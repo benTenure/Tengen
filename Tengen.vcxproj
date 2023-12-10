@@ -72,19 +72,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\PersonalProjects\OpenGL\Tengen\Libraries\include;C:\PersonalProjects\OpenGL\Tengen\Libraries\include\imgui\v1_90;C:\PersonalProjects\OpenGL\YoutubeOpenGL\Libraries\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include;$(SolutionDir)\Libraries\include\imgui\v1_90;C:\PersonalProjects\OpenGL\YoutubeOpenGL\Libraries\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\PersonalProjects\OpenGL\YoutubeOpenGL\Libraries\lib;$(LibraryPath);C:\PersonalProjects\OpenGL\Tengen\Libraries\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\PersonalProjects\OpenGL\Tengen\Libraries\include;C:\PersonalProjects\OpenGL\Tengen\Libraries\include\imgui\v1_90;C:\PersonalProjects\OpenGL\YoutubeOpenGL\Libraries\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include;$(SolutionDir)\Libraries\include\imgui\v1_90;C:\PersonalProjects\OpenGL\YoutubeOpenGL\Libraries\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\PersonalProjects\OpenGL\YoutubeOpenGL\Libraries\lib;$(LibraryPath);C:\PersonalProjects\OpenGL\Tengen\Libraries\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\PersonalProjects\OpenGL\Tengen\Libraries\include;C:\PersonalProjects\OpenGL\Tengen\Libraries\include\imgui\v1_90;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include;$(SolutionDir)\Libraries\include\imgui\v1_90;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\PersonalProjects\OpenGL\Tengen\Libraries\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\PersonalProjects\OpenGL\Tengen\Libraries\include;C:\PersonalProjects\OpenGL\Tengen\Libraries\include\imgui\v1_90;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)\Libraries\include;$(SolutionDir)\Libraries\include\imgui\v1_90;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\PersonalProjects\OpenGL\Tengen\Libraries\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -94,7 +94,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PersonalProjects\OpenGL\Tengen\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PersonalProjects\OpenGL\Tengen\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -126,7 +126,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PersonalProjects\OpenGL\Tengen\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\PersonalProjects\OpenGL\Tengen\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,8 +152,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\App.cpp" />
     <ClCompile Include="Engine\Camera.cpp" />
-    <ClCompile Include="Engine\Main.cpp" />
     <ClCompile Include="Engine\Shader.cpp" />
     <ClCompile Include="Engine\Window.cpp" />
     <ClCompile Include="Libraries\include\glm\detail\glm.cpp" />
@@ -306,6 +306,8 @@
     <None Include="Libraries\include\imgui\v1_90\examples\libs\emscripten\shell_minimal.html" />
     <None Include="Shaders\default.frag" />
     <None Include="Shaders\default.vert" />
+    <None Include="Shaders\light.frag" />
+    <None Include="Shaders\light.vert" />
     <None Include="Shaders\moveRight.vert" />
     <None Include="Shaders\posColor.frag" />
     <None Include="Shaders\posColor.vert" />

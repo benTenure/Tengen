@@ -33,9 +33,6 @@
     <ClCompile Include="Engine\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -61,6 +58,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Libraries\include\imgui\v1_90\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -475,6 +475,8 @@
     <None Include="Shaders\upsideDown.vert" />
     <None Include="Libraries\include\imgui\v1_90\examples\example_emscripten_wgpu\web\index.html" />
     <None Include="Libraries\include\imgui\v1_90\examples\libs\emscripten\shell_minimal.html" />
+    <None Include="Shaders\light.vert" />
+    <None Include="Shaders\light.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Libraries\include\glad\glad.h">
