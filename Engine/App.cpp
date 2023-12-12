@@ -48,14 +48,19 @@
 
 static std::string APP_DEFAULT_PROJECT_NAME = "Tengen 0";
 
-static glm::mat4 transform = glm::mat4(1.0f);
+static glm::mat4 g_transform = glm::mat4(1.0f);
 
-static float deltaTime = 0.0f;	// Time between current frame and last frame
-static float lastFrame = 0.0f; // Time of last frame
+static float g_deltaTime = 0.0f;	// Time between current frame and last frame
+static float g_lastFrame = 0.0f; // Time of last frame
 
-static float fov = 45.0f;
+static float g_fov = 45.0f;
 
-Camera s_mainCamera;
+// Mouse input variables (hate this :seething:)
+static float g_lastX = Window::WINDOW_DEFAULT_WIDTH / 2.0f;
+static float g_lastY = Window::WINDOW_DEFAULT_HEIGHT / 2.0f;
+static bool g_firstMouse = true;
+
+Camera g_mainCamera;
 
 struct Color
 {
@@ -86,23 +91,38 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	s_mainCamera.ProcessMouse(xpos, ypos);
+	float xposf = static_cast<float>(xpos);
+	float yposf = static_cast<float>(ypos);
+
+	if (g_firstMouse) // initially set to true. Still needed???
+	{
+		g_lastX = xposf;
+		g_lastY = yposf;
+		g_firstMouse = false;
+	}
+
+	float xoffset = xposf - g_lastX;
+	float yoffset = g_lastY - yposf; // reversed since y-coordinates range from bottom to top
+	g_lastX = xposf;
+	g_lastY = yposf;
+
+	g_mainCamera.ProcessMouse(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	// Set up a sub/pub relationship for things that want input? Might be crazy to go through
-	s_mainCamera.ProcessScrollWheel(xoffset, yoffset);
+	g_mainCamera.ProcessScrollWheel(xoffset, yoffset);
 }
 
 void MoveRight()
 {
-	transform = glm::translate(transform, glm::vec3(0.1f, 0.0f, 0.0f));
+	g_transform = glm::translate(g_transform, glm::vec3(0.1f, 0.0f, 0.0f));
 }
 
 void MoveLeft()
 {
-	transform = glm::translate(transform, glm::vec3(-0.1f, 0.0f, 0.0f));
+	g_transform = glm::translate(g_transform, glm::vec3(-0.1f, 0.0f, 0.0f));
 }
 
 void processInput(GLFWwindow* window)
@@ -179,47 +199,47 @@ int main()
 
 	// We'll use one cube for both the box and light for now
 	float vertices[] = {
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-	-0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
 
 	unsigned int VBO, VAO;
@@ -232,8 +252,12 @@ int main()
 	glBindVertexArray(VAO);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	// normal attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	// Light
 	unsigned int lightVAO;
@@ -241,12 +265,8 @@ int main()
 	glBindVertexArray(lightVAO); 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	
-	// texture coord attribute
-	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
 
 	// TODO: Put this in an actual function for OpenGL context. It could actually be helpful
 	// Ping the GPU for the max number of vertex attributes it can support
@@ -296,8 +316,8 @@ int main()
 	{
 		// Time check/update
 		float currentFrame = static_cast<float>(glfwGetTime());
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		g_deltaTime = currentFrame - g_lastFrame;
+		g_lastFrame = currentFrame;
 
 		// Future game loop order:
 		// -----------------------
@@ -309,12 +329,7 @@ int main()
 
 		// Input
 		window.ProcessInput();
-		s_mainCamera.ProcessInput(window, deltaTime);
-
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, texture1);
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, texture2);
+		g_mainCamera.ProcessInput(window, g_deltaTime);
 
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
@@ -326,7 +341,7 @@ int main()
 
 			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-			ImGui::SliderFloat("FOV", &fov, 45.0f, 115.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+			ImGui::SliderFloat("FOV", &g_fov, 45.0f, 115.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
 			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
@@ -345,7 +360,7 @@ int main()
 		glClearColor(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a); // state-setting
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using
 
-		s_mainCamera.SetFOV(fov);
+		g_mainCamera.SetFOV(g_fov);
 
 		// Draw regular cube
 		defaultShader.Use();
@@ -354,31 +369,39 @@ int main()
 
 		// Coordinate Stuff (OpenGL uses a right-handed coordinate system, +x to the right, +y up, +z towards me)
 		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = s_mainCamera.Update();
-		glm::mat4 projection = glm::perspective(glm::radians(s_mainCamera.GetFOV()), static_cast<float>(Window::WINDOW_DEFAULT_WIDTH) / static_cast<float>(Window::WINDOW_DEFAULT_HEIGHT), 0.1f, 100.0f);
+		glm::mat4 view = g_mainCamera.Update();
+		glm::mat4 projection = glm::perspective(glm::radians(g_mainCamera.GetFOV()), static_cast<float>(Window::WINDOW_DEFAULT_WIDTH) / static_cast<float>(Window::WINDOW_DEFAULT_HEIGHT), 0.1f, 100.0f);
 		defaultShader.SetMat4("model", model);
 		defaultShader.SetMat4("view", view);
 		defaultShader.SetMat4("projection", projection);
+		defaultShader.SetVec3("lightPos", lightPos);
+		defaultShader.SetVec3("viewPos", g_mainCamera.GetPosition());
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// Light cube placement and draw call
-		lightShader.Use();
+		// Draw light cube (not changing?)
+		{
+			// Light cube placement and draw call
+			lightShader.Use();
 
-		// set the model, view and projection matrix uniforms
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f));
+			// set the model, view and projection matrix uniforms
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, lightPos);
+			model = glm::scale(model, glm::vec3(0.2f));
 
-		// I need 2 different shaders...
-		lightShader.SetMat4("model", model);
-		lightShader.SetMat4("view", view);
-		lightShader.SetMat4("projection", projection);
+			// I need 2 different shaders...
+			lightShader.SetMat4("model", model);
+			lightShader.SetMat4("view", view);
+			lightShader.SetMat4("projection", projection);
+			//lightShader.SetFloat("xoffset", cos(g_deltaTime));
+			//lightShader.SetFloat("yoffset", sin(g_deltaTime));
 
-		// draw the light cube object
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+			// draw the light cube object
+			glBindVertexArray(lightVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ImGUI.SwapBuffers equivalent
 		window.SwapBuffers();

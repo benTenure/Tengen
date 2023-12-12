@@ -1,5 +1,5 @@
 #include "Window.h"
-//#include <stdio.h>
+
 #include <iostream>
 
 Window::Window(std::string windowName)

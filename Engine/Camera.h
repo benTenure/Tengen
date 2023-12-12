@@ -15,7 +15,7 @@ public:
 	void ProcessInput(Window window, float deltaTime);
 
 	// Used as the callback function for mouse pointer input
-	void ProcessMouse(double xpos, double ypos);
+	void ProcessMouse(float xoffset, float yoffset);
 
 	// Used as the callback function for the scroll wheel
 	void ProcessScrollWheel(double xoffset, double yoffset);
@@ -46,8 +46,5 @@ private:
 	float m_yaw{};
 	float m_pitch{};
 	float m_fov{};
-
-	float m_lastX{};
-	float m_lastY{};
-	bool m_firstMouse{};
+	float m_sensitivity{};
 };

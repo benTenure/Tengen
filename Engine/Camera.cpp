@@ -9,18 +9,16 @@ Camera::Camera()
 	m_front = glm::vec3(0.0f, 0.0f, -1.0f);
 	m_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	m_yaw = 90.0f;
+	m_yaw = -90.0f;
 	m_pitch = 0.0f;
 	m_fov = 45.0f;
-
-	m_firstMouse = true;
-	m_lastX = 1080; // Get these from window class? static public var's?
-	m_lastY = 1080;
+	m_sensitivity = 0.1f;
 }
 
 Camera::Camera(glm::vec3 lookAt)
 {
 	// TODO: Supply a desired target for the camera to spawn looking at. Maybe something saved in the level or because we're doing transitions idk
+	// TODO: TODO: Is this really needed? Are cameras really going to by programmatically created and dynamically assigned at runtime? Sounds dumb
 }
 
 glm::mat4 Camera::Update()
@@ -51,30 +49,24 @@ void Camera::ProcessInput(Window window, float deltaTime)
 	{
 		m_position += glm::normalize(glm::cross(m_front, m_up)) * cameraSpeed;
 	}
+	
+	if (glfwGetKey(window.GetWindowHandle(), GLFW_KEY_SPACE) == GLFW_PRESS)
+	{
+		m_position += cameraSpeed * glm::vec3(0.0f, 1.0f, 0.0f);
+	}
+	
+	if (glfwGetKey(window.GetWindowHandle(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		m_position += cameraSpeed * glm::vec3(0.0f, -1.0f, 0.0f);
+	}
 }
 
 // Another function when we need to tell the 
 
-void Camera::ProcessMouse(double xpos, double ypos)
+void Camera::ProcessMouse(float xoffset, float yoffset)
 {
-	float xposf = static_cast<float>(xpos);
-	float yposf = static_cast<float>(ypos);
-
-	if (m_firstMouse) // initially set to true. Still needed???
-	{
-		m_lastX = xposf;
-		m_lastY = yposf;
-		m_firstMouse = false;
-	}
-
-	float xoffset = xposf - m_lastX;
-	float yoffset = m_lastY - yposf; // reversed since y-coordinates range from bottom to top
-	m_lastX = xposf;
-	m_lastY = yposf;
-
-	const float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
+	xoffset *= m_sensitivity;
+	yoffset *= m_sensitivity;
 
 	m_yaw += xoffset;
 	m_pitch += yoffset;
@@ -85,11 +77,11 @@ void Camera::ProcessMouse(double xpos, double ypos)
 		m_pitch = -89.0f;
 
 	// Camera movement
-	glm::vec3 direction = {};
-	direction.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-	direction.y = sin(glm::radians(m_pitch));
-	direction.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-	m_front = glm::normalize(direction);
+	glm::vec3 front = {};
+	front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+	front.y = sin(glm::radians(m_pitch));
+	front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+	m_front = glm::normalize(front);
 }
 
 void Camera::ProcessScrollWheel(double xoffset, double yoffset)
