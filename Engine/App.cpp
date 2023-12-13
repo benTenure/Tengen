@@ -394,8 +394,8 @@ int main()
 			lightShader.SetMat4("model", model);
 			lightShader.SetMat4("view", view);
 			lightShader.SetMat4("projection", projection);
-			//lightShader.SetFloat("xoffset", cos(g_deltaTime));
-			//lightShader.SetFloat("yoffset", sin(g_deltaTime));
+			lightShader.SetFloat("xoffset", cos(static_cast<float>(glfwGetTime())));
+			lightShader.SetFloat("yoffset", cos(static_cast<float>(glfwGetTime())));
 
 			// draw the light cube object
 			glBindVertexArray(lightVAO);
