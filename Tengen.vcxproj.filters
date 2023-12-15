@@ -1301,6 +1301,9 @@
     <ClInclude Include="Engine\App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\awesomeface.png">
@@ -1310,6 +1313,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\Images\wall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Images\container2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Images\container2_specular.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

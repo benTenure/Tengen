@@ -124,7 +124,7 @@ void Shader::SetVec4(const std::string& name, glm::vec4 value) const
 
 void Shader::SetMat4(const std::string& name, glm::mat4 value) const
 {	
-	glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value)); // glm::value_ptr(value));
+	glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 int Shader::GetID()
