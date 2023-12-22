@@ -3,13 +3,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <imgui.h>
 #include <iostream>
-#include <stb/stb_image.h>
 #include <stdio.h>
 
-#include "Shader.h"
+#include "App.h"
 #include "Camera.h"
+#include "Model.h"
+#include "Shader.h"
 #include "Window.h"
 #include <vector>
 
@@ -256,7 +256,8 @@ int main()
 	// Configure global state of GL
 	glEnable(GL_DEPTH_TEST);
 
-	Shader defaultShader("Shaders/default.vert", "Shaders/default.frag");
+	//Shader defaultShader("Shaders/default.vert", "Shaders/default.frag");
+	Shader defaultShader("Shaders/simple.vert", "Shaders/simple.frag");
 	Shader lightShader("Shaders/light.vert", "Shaders/light.frag");
 
 	// We'll use one cube for both the box and light for now
@@ -369,9 +370,9 @@ int main()
 	
 	glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
 
-	defaultShader.Use();
-	defaultShader.SetInt("material.diffuse", 0);
-	defaultShader.SetInt("material.specular", 1);
+	//defaultShader.Use();
+	//defaultShader.SetInt("material.diffuse", 0);
+	//defaultShader.SetInt("material.specular", 1);
 	//defaultShader.SetInt("material.emission", 2);
 
 	glm::vec3 pointLightPositions[] = {
@@ -380,6 +381,9 @@ int main()
 	glm::vec3(-4.0f,  2.0f, -12.0f),
 	glm::vec3(0.0f,  0.0f, -3.0f)
 	};
+
+	std::string path = "Resources/Models/backpack/backpack.obj";
+	Model backpack(path.c_str());
 
 	// Main loop
 	while (!window.CloseWindow())
@@ -443,10 +447,10 @@ int main()
 		defaultShader.SetMat4("model", model);
 		defaultShader.SetMat4("view", view);
 		defaultShader.SetMat4("projection", projection);
-		defaultShader.SetVec3("viewPos", g_mainCamera.GetPosition());
+		//defaultShader.SetVec3("viewPos", g_mainCamera.GetPosition());
 
-		defaultShader.SetVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-		defaultShader.SetFloat("material.shininess", 320.0f);
+		//defaultShader.SetVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		//defaultShader.SetFloat("material.shininess", 320.0f);
 
 		glm::vec3 ambient(0.2f, 0.2f, 0.2f);
 		glm::vec3 diffuse(0.5f, 0.5f, 0.5f);
@@ -458,82 +462,60 @@ int main()
 		//defaultShader.SetVec3("dirLight.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
 		//defaultShader.SetVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-		// Point Lights
-		defaultShader.SetVec3("pointLights[0].position", pointLightPositions[0]);
-		defaultShader.SetVec3("pointLights[1].position", pointLightPositions[1]);
-		defaultShader.SetVec3("pointLights[2].position", pointLightPositions[2]);
-		defaultShader.SetVec3("pointLights[3].position", pointLightPositions[3]);
-
-		defaultShader.SetFloat("pointLights[0].constant", 1.0f);
-		defaultShader.SetFloat("pointLights[1].constant", 1.0f);
-		defaultShader.SetFloat("pointLights[2].constant", 1.0f);
-		defaultShader.SetFloat("pointLights[3].constant", 1.0f);
-
-		defaultShader.SetFloat("pointLights[0].linear", 0.09f);
-		defaultShader.SetFloat("pointLights[1].linear", 0.09f);
-		defaultShader.SetFloat("pointLights[2].linear", 0.09f);
-		defaultShader.SetFloat("pointLights[3].linear", 0.09f);
-		
-		defaultShader.SetFloat("pointLights[0].quadratic", 0.032f);
-		defaultShader.SetFloat("pointLights[1].quadratic", 0.032f);
-		defaultShader.SetFloat("pointLights[2].quadratic", 0.032f);
-		defaultShader.SetFloat("pointLights[3].quadratic", 0.032f);
-
-		defaultShader.SetVec3("pointLights[0].ambient", ambient);
-		defaultShader.SetVec3("pointLights[1].ambient", glm::vec3(0.0f, 0.0f, 1.0f));
-		defaultShader.SetVec3("pointLights[2].ambient", glm::vec3(1.0f, 0.0f, 0.0f));
-		defaultShader.SetVec3("pointLights[3].ambient", glm::vec3(0.0f, 1.0f, 0.0f));
-
-		defaultShader.SetVec3("pointLights[0].diffuse", diffuse);
-		defaultShader.SetVec3("pointLights[1].diffuse", diffuse);
-		defaultShader.SetVec3("pointLights[2].diffuse", diffuse);
-		defaultShader.SetVec3("pointLights[3].diffuse", diffuse);
-
-		defaultShader.SetVec3("pointLights[0].specular", specular);
-		defaultShader.SetVec3("pointLights[1].specular", specular);
-		defaultShader.SetVec3("pointLights[2].specular", specular);
-		defaultShader.SetVec3("pointLights[3].specular", specular);
+		// Point Light
+		//defaultShader.SetVec3("pointLights[0].position", pointLightPositions[0]);
+		//defaultShader.SetFloat("pointLights[0].constant", 1.0f);
+		//defaultShader.SetFloat("pointLights[0].linear", 0.09f);
+		//defaultShader.SetFloat("pointLights[0].quadratic", 0.032f);
+		//defaultShader.SetVec3("pointLights[0].ambient", ambient);
+		//defaultShader.SetVec3("pointLights[0].diffuse", diffuse);
+		//defaultShader.SetVec3("pointLights[0].specular", specular);
 
 		// Flashlight (SpotLight)
-		defaultShader.SetVec3("spotLight.position", g_mainCamera.GetPosition());
-		defaultShader.SetVec3("spotLight.direction", g_mainCamera.GetFront());
-		defaultShader.SetFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		defaultShader.SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-		defaultShader.SetFloat("spotLight.constant", 1.0f);
-		defaultShader.SetFloat("spotLight.linear", 0.09f);
-		defaultShader.SetFloat("spotLight.quadratic", 0.032f);
-		defaultShader.SetVec3("spotLight.ambient", ambient);
-		defaultShader.SetVec3("spotLight.diffuse", diffuse);
-		defaultShader.SetVec3("spotLight.specular", specular);
+		//defaultShader.SetVec3("spotLight.position", g_mainCamera.GetPosition());
+		//defaultShader.SetVec3("spotLight.direction", g_mainCamera.GetFront());
+		//defaultShader.SetFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		//defaultShader.SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+		//defaultShader.SetFloat("spotLight.constant", 1.0f);
+		//defaultShader.SetFloat("spotLight.linear", 0.09f);
+		//defaultShader.SetFloat("spotLight.quadratic", 0.032f);
+		//defaultShader.SetVec3("spotLight.ambient", ambient);
+		//defaultShader.SetVec3("spotLight.diffuse", diffuse);
+		//defaultShader.SetVec3("spotLight.specular", specular);
 
+		backpack.Draw(defaultShader);
 
-		glActiveTexture(GL_TEXTURE0);
+		/*glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-		
+
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
+		glBindTexture(GL_TEXTURE_2D, specularMap);*/
 		
 		//glActiveTexture(GL_TEXTURE2);
 		//glBindTexture(GL_TEXTURE_2D, emissionMap);
 
 		//DrawManyCubes(cubePositions, defaultShader, VAO);
 		
-		glBindVertexArray(VAO);
-		
-		for (unsigned int i = 0; i < cubePositions.size(); i++)
+		if (false)
 		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			defaultShader.SetMat4("model", model);
-		
+			glBindVertexArray(VAO);
+
+			for (unsigned int i = 0; i < cubePositions.size(); i++)
+			{
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, cubePositions[i]);
+				float angle = 20.0f * i;
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+				defaultShader.SetMat4("model", model);
+
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}
+
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Draw light cube (not changing?)
+		if (false)
 		{
 			// Light cube placement and draw call
 			lightShader.Use();
