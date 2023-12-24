@@ -4,11 +4,14 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <vector>
+#include <filesystem>
 #include <string>
+#include <vector>
 
 #include "Shader.h"
 #include "Mesh.h"
+
+typedef std::filesystem::path Path;
 
 using namespace MeshLoader;
 
@@ -22,7 +25,7 @@ public:
 		, m_applyGammaCorrection(false)
 	{}
 
-	Model(const char* path, bool gamma = false)
+	Model(Path path, bool gamma = false)
 		: m_applyGammaCorrection(gamma)
 	{
 		LoadModel(path);
@@ -31,7 +34,7 @@ public:
 	void Draw(Shader& shader);
 
 private:
-	void LoadModel(const std::string &path);
+	void LoadModel(const Path &path);
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
 	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);

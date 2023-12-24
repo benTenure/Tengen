@@ -1,7 +1,5 @@
 #include "Mesh.h"
 
-using namespace MeshLoader;
-
 // Moving vectors like this good? Seem bad? Slow.
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 	: m_vertices(vertices)
@@ -104,6 +102,7 @@ unsigned int Texture::TextureFromFile(const char* path, const std::string& direc
 	glGenTextures(1, &textureID);
 
 	int width, height, numComponents;
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &numComponents, 0);
 
 	if (data)

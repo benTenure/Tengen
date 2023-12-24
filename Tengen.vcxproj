@@ -82,7 +82,7 @@
     <ExecutablePath>$(SolutionDir)\Libraries\dll;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Libraries\include;$(SolutionDir)Libraries\include\imgui\v1_90;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Libraries\include;$(SolutionDir)Libraries\include\imgui\v1_90;$(SolutionDir)Runtime;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Libraries\lib\glfw\;$(SolutionDir)Libraries\lib\assimp\;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(SolutionDir)Debug;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(SolutionDir)Libraries\dll;$(ExecutablePath)</ExecutablePath>
@@ -163,6 +163,7 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -194,10 +195,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Runtime\Components\ComponentManager.cpp" />
+    <ClCompile Include="Engine\Input\InputManager.cpp" />
+    <ClCompile Include="Runtime\Components\Component.cpp" />
     <ClCompile Include="Engine\App.cpp" />
     <ClCompile Include="Engine\Camera.cpp" />
     <ClCompile Include="Engine\Shader.cpp" />
     <ClCompile Include="Engine\Window.cpp" />
+    <ClCompile Include="Runtime\GameObject.cpp" />
     <ClCompile Include="Libraries\include\glm\detail\glm.cpp" />
     <ClCompile Include="Libraries\include\imgui\v1_90\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="Libraries\include\imgui\v1_90\backends\imgui_impl_opengl3.cpp" />
@@ -368,10 +373,14 @@
     <None Include="Shaders\simple.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Runtime\Components\ComponentManager.h" />
+    <ClInclude Include="Engine\Input\InputManager.h" />
+    <ClInclude Include="Runtime\Components\Component.h" />
     <ClInclude Include="Engine\App.h" />
     <ClInclude Include="Engine\Camera.h" />
     <ClInclude Include="Engine\Shader.h" />
     <ClInclude Include="Engine\Window.h" />
+    <ClInclude Include="Runtime\GameObject.h" />
     <ClInclude Include="Libraries\include\assimp\aabb.h" />
     <ClInclude Include="Libraries\include\assimp\ai_assert.h" />
     <ClInclude Include="Libraries\include\assimp\anim.h" />

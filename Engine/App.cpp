@@ -1,5 +1,6 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -382,8 +383,10 @@ int main()
 	glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
-	std::string path = "Resources/Models/backpack/backpack.obj";
-	Model backpack(path.c_str());
+	//std::string path = "Resources/Models/backpack/backpack.obj";
+	std::filesystem::path objPath("Resources/Models/backpack/backpack.obj");
+	//std::string path = "Resources/Models/stormtrooper/StormTrooper.fbx";
+	Model mesh(objPath.c_str());
 
 	// Main loop
 	while (!window.CloseWindow())
@@ -398,8 +401,8 @@ int main()
 		// 1) User Input
 		// 2) Simulation
 		// 2) Physics
-		// 3) Rendering
-		// 4) Draw call
+		// 3.1) Rendering
+		// 3.2) Draw call
 
 		// Input
 		window.ProcessInput();
@@ -410,7 +413,7 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		if (false)
+		if (true)
 		{
 			static int counter = 0;
 
@@ -483,7 +486,7 @@ int main()
 		//defaultShader.SetVec3("spotLight.diffuse", diffuse);
 		//defaultShader.SetVec3("spotLight.specular", specular);
 
-		backpack.Draw(defaultShader);
+		mesh.Draw(defaultShader);
 
 		/*glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);

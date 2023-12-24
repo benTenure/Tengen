@@ -69,6 +69,18 @@
     <ClCompile Include="Engine\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Runtime\GameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\Components\Component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Input\InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime\Components\ComponentManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\include\glm\detail\func_common.inl">
@@ -1586,6 +1598,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Libraries\include\assimp\ZipArchiveIOSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\GameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\Components\Component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Input\InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\Components\ComponentManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

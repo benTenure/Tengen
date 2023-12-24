@@ -10,10 +10,11 @@ void Model::Draw(Shader& shader)
 	}
 }
 
-void Model::LoadModel(const std::string &path)
+void Model::LoadModel(const Path &path)
 {
+	std::string strPath = path.string();
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(strPath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -21,7 +22,7 @@ void Model::LoadModel(const std::string &path)
 		return;
 	}
 
-	m_directory = path.substr(0, path.find_last_of('/'));
+	m_directory = path.parent_path().string();
 
 	ProcessNode(scene->mRootNode, scene);
 }
@@ -75,7 +76,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
-			vertex.m_uvCoords = vec;
+			vertex.m_texCoords = vec;
 			// tangent
 			vector.x = mesh->mTangents[i].x;
 			vector.y = mesh->mTangents[i].y;
@@ -89,7 +90,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		}
 		else
 		{
-			vertex.m_uvCoords = glm::vec2(0.0f);
+			vertex.m_texCoords = glm::vec2(0.0f);
 		}
 
 		vertices.push_back(vertex);
@@ -148,7 +149,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
 		if (!skip)
 		{
 			Texture texture;
-			texture.m_id = texture.TextureFromFile(str.C_Str(), m_directory, false);
+			texture.m_id = texture.TextureFromFile(str.C_Str(), m_directory, m_applyGammaCorrection);
 			texture.m_type = typeName;
 			texture.m_path = str.C_Str();
 
