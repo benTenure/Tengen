@@ -77,11 +77,13 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.m_texCoords = vec;
+
 			// tangent
 			vector.x = mesh->mTangents[i].x;
 			vector.y = mesh->mTangents[i].y;
 			vector.z = mesh->mTangents[i].z;
 			vertex.m_tangent = vector;
+
 			// bitangent
 			vector.x = mesh->mBitangents[i].x;
 			vector.y = mesh->mBitangents[i].y;
@@ -108,16 +110,16 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::DIFFUSE);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-		std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::SPECULAR);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		
-		std::vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		std::vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, TextureType::NORMAL); //aiTextureType_NORMALS seems to be the actual option??
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-		std::vector<Texture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+		std::vector<Texture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, TextureType::HEIGHT);
 		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 	}
 
@@ -125,7 +127,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 }
 
 // TODO: I hate this function. This absolutely needs to be cleaned up. This does NOTHING with the material??? What's he doing bro
-std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType textureType)
 {
 	std::vector<Texture> textures;
 
@@ -138,7 +140,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 		for (unsigned int j = 0; j < m_loadedTextures.size(); j++)
 		{
-			if (std::strcmp(m_loadedTextures[j].m_path.data(), str.C_Str()) == 0)
+			if (m_loadedTextures[j].m_path.string().compare(str.C_Str()) == 0)
 			{
 				textures.push_back(m_loadedTextures[j]);
 				skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
@@ -149,8 +151,8 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
 		if (!skip)
 		{
 			Texture texture;
-			texture.m_id = texture.TextureFromFile(str.C_Str(), m_directory, m_applyGammaCorrection);
-			texture.m_type = typeName;
+			texture.m_id = texture.LoadTextureFromFile(str.C_Str(), m_directory, m_applyGammaCorrection);
+			texture.m_type = textureType;
 			texture.m_path = str.C_Str();
 
 			textures.push_back(texture);

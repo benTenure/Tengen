@@ -24,22 +24,6 @@ public:
 		, m_biTangent(glm::vec3(0.0f))
 	{}
 
-	void SetPosition(glm::vec3 position);
-	glm::vec3 GetPosition();
-
-	void SetNormal(glm::vec3 normal);
-	glm::vec3 GetNormal();
-
-	void SetTexCoords(glm::vec2 texCoords);
-	glm::vec2 GetTexCoords();
-
-	void SetTangent(glm::vec3 tangent);
-	glm::vec3 GetTangent();
-
-	void SetBiTangent(glm::vec3 biTangent);
-	glm::vec3 GetBiTangent();
-
-private:
 	glm::vec3 m_position;
 	glm::vec2 m_texCoords;
 	glm::vec3 m_normal;
@@ -60,7 +44,8 @@ enum TextureType
 	NORMAL,
 	ROUGHNESS,
 	SPECULAR,
-	AMBIENTOCCLUSION
+	AMBIENT_OCCLUSION,
+	HEIGHT
 };
 
 struct Texture
@@ -72,9 +57,19 @@ public:
 		, m_path("")
 	{}
 
-	unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma);
+	unsigned int LoadTextureFromFile(const char* path, const std::string& directory, bool gamma);
 
-private:
+	static std::string ToString(TextureType textureType);
+
+	/*unsigned int GetID();
+
+	void SetType(TextureType type);
+	TextureType GetType();
+
+	void SetPath(std::filesystem::path path);
+	std::filesystem::path GetPath();*/
+
+//private:
 	unsigned int m_id;
 	TextureType m_type;
 	std::filesystem::path m_path;
@@ -85,6 +80,10 @@ class Mesh
 public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	void Draw(Shader& shader); // I would really like the ability to assign shaders to objects, keep things together. But accessing an existing shader is better. Override maybe?
+
+	void AddVertex(Vertex vertex);
+	void AddIndex(unsigned int index);
+	void AddTexture(Texture texture);
 
 private:
 	void SetupMesh();

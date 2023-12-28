@@ -11,9 +11,8 @@
 #include "Shader.h"
 #include "Mesh.h"
 
+// There must be a solution to this double namespace nonsense
 typedef std::filesystem::path Path;
-
-using namespace MeshLoader;
 
 class Model
 {
@@ -37,7 +36,7 @@ private:
 	void LoadModel(const Path &path);
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType textureType);
 	
 	std::vector<Mesh> m_meshes;
 	std::vector<Texture> m_loadedTextures;

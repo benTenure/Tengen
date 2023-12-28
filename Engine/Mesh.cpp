@@ -23,16 +23,26 @@ void Mesh::Draw(Shader& shader)
 	{
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 		// retrieve texture number (the N in diffuse_textureN)
-		std::string number;
-		std::string name = m_textures[i].m_type;
-		if (name == "texture_diffuse")
+		std::string number; 
+		std::string name = Texture::ToString(m_textures[i].m_type);// = m_textures[i].m_type;
+
+		switch (m_textures[i].m_type)
+		{
+		case TextureType::DIFFUSE:
 			number = std::to_string(diffuseNum++);
-		else if (name == "texture_specular")
-			number = std::to_string(specularNum++); // transfer unsigned int to string
-		else if (name == "texture_normal")
-			number = std::to_string(normalNum++); // transfer unsigned int to string
-		else if (name == "texture_height")
-			number = std::to_string(heightNum++); // transfer unsigned int to string
+			break;
+		case TextureType::SPECULAR:
+			number = std::to_string(specularNum++);
+			break;
+		case TextureType::NORMAL:
+			number = std::to_string(normalNum++);
+			break;
+		case TextureType::HEIGHT:
+			number = std::to_string(heightNum++);
+			break;
+		default:
+			break;
+		}
 
 		// now set the sampler to the correct texture unit
 		glUniform1i(glGetUniformLocation(shader.GetID(), (name + number).c_str()), i);
@@ -46,6 +56,21 @@ void Mesh::Draw(Shader& shader)
 	glBindVertexArray(0);
 	
 	glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::AddVertex(Vertex vertex)
+{
+	m_vertices.push_back(vertex);
+}
+
+void Mesh::AddIndex(unsigned int index)
+{
+	m_indices.push_back(index);
+}
+
+void Mesh::AddTexture(Texture texture)
+{
+	m_textures.push_back(texture);
 }
 
 void Mesh::SetupMesh()
@@ -70,9 +95,9 @@ void Mesh::SetupMesh()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_normal));
     
-    // vertex texture coords
+    // vertex texture coordinates
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_uvCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_texCoords));
 
 	//// vertex tangent
 	//glEnableVertexAttribArray(3);
@@ -93,7 +118,7 @@ void Mesh::SetupMesh()
     glBindVertexArray(0);
 }
 
-unsigned int Texture::TextureFromFile(const char* path, const std::string& directory, bool gamma)
+unsigned int Texture::LoadTextureFromFile(const char* path, const std::string& directory, bool gamma)
 {
 	std::string filename = path;
 	filename = directory + '/' + filename;
@@ -133,4 +158,35 @@ unsigned int Texture::TextureFromFile(const char* path, const std::string& direc
 	stbi_image_free(data);
 
 	return textureID;
+}
+
+std::string Texture::ToString(TextureType textureType)
+{
+	std::string result;
+
+	switch (textureType)
+	{
+	case TextureType::DIFFUSE:
+		result = "texture_diffuse";
+		break;
+	case TextureType::NORMAL:
+		result = "texture_diffuse";
+		break;
+	case TextureType::ROUGHNESS:
+		result = "texture_diffuse";
+		break;
+	case TextureType::SPECULAR:
+		result = "texture_diffuse";
+		break;
+	case TextureType::AMBIENT_OCCLUSION:
+		result = "texture_diffuse";
+		break;
+	case TextureType::HEIGHT:
+		result = "texture_diffuse";
+		break;
+	default:
+		break;
+	}
+
+	return result;
 }
