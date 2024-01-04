@@ -196,6 +196,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Editor\Editor.cpp" />
+    <ClCompile Include="Engine\Input\InputContext.cpp" />
     <ClCompile Include="Runtime\Components\ComponentManager.cpp" />
     <ClCompile Include="Engine\Input\InputManager.cpp" />
     <ClCompile Include="Runtime\Components\Component.cpp" />
@@ -376,6 +377,7 @@
   <ItemGroup>
     <ClInclude Include="Editor\Editor.h" />
     <ClInclude Include="Editor\EditorDefines.h" />
+    <ClInclude Include="Engine\Input\InputContext.h" />
     <ClInclude Include="Runtime\Components\ComponentManager.h" />
     <ClInclude Include="Engine\Input\InputManager.h" />
     <ClInclude Include="Runtime\Components\Component.h" />
