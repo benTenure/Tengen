@@ -9,6 +9,7 @@
 
 #include "App.h"
 #include "Camera.h"
+#include "Editor/Editor.h"
 #include "Model.h"
 #include "Shader.h"
 #include "Window.h"
@@ -51,7 +52,7 @@ static std::string APP_DEFAULT_PROJECT_NAME = "Tengen 0";
 
 static glm::mat4 g_transform = glm::mat4(1.0f);
 
-static float g_deltaTime = 0.0f;	// Time between current frame and last frame
+static float g_deltaTime = 0.0f; // Time between current frame and last frame
 static float g_lastFrame = 0.0f; // Time of last frame
 
 static float g_fov = 45.0f;
@@ -156,76 +157,17 @@ void processInput(GLFWwindow* window)
 	}
 }
 
-// utility function for loading a 2D texture from file
-// ---------------------------------------------------
-unsigned int LoadTexture(char const* path)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format = GL_NONE;
-
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-	}
-
-	return textureID;
-}
-
-/*
-	I tried putting this logic into a function so I could use it again later but it doesn't work?
-	Maybe leaving the context of the shader makes it so this function doesn't know that the 
-	defaultShader is being used
-*/
-void DrawManyCubes(const std::vector<glm::vec3> &cubePositions, Shader defaultShader, unsigned int VAO)
-{
-	glBindVertexArray(VAO);
-
-	for (unsigned int i = 0; i < cubePositions.size(); i++)
-	{
-		defaultShader.Use();
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, cubePositions[i]);
-		float angle = 20.0f * i;
-		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-		defaultShader.SetMat4("model", model);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-	}
-}
-
 int main()
 {
 	Window window(APP_DEFAULT_PROJECT_NAME);
+	Editor editor;
 
 	// Setup Dear ImGui context
+	editor.Init();
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGuiIO& io = ImGui::GetIO();
+	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -252,7 +194,7 @@ int main()
 	glfwSetScrollCallback(window.GetWindowHandle(), scroll_callback);
 
 	// Keep the cursor constrained to the window and invisible
-	glfwSetInputMode(window.GetWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window.GetWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	
 	// Configure global state of GL
 	glEnable(GL_DEPTH_TEST);
@@ -320,32 +262,13 @@ int main()
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
-	unsigned int VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	
-	// texture coordinate attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
 	// Light
-	unsigned int lightVAO;
+	unsigned int lightVAO, lightVBO;
 	glGenVertexArrays(1, &lightVAO);
+	glGenBuffers(1, &lightVBO);
+
 	glBindVertexArray(lightVAO); 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -355,16 +278,6 @@ int main()
 	//int nrAttributes;
 	//glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	//std::cout << "Maximum num of vertex attributes supported: " << nrAttributes << std::endl;
-	
-	// Creating a texture
-	std::string diffusePath = "Resources/Images/container2.png";
-	unsigned int diffuseMap = LoadTexture(diffusePath.c_str());
-	
-	std::string specularPath = "Resources/Images/container2_specular.png";
-	unsigned int specularMap = LoadTexture(specularPath.c_str());
-	
-	//std::string emissionPath = "Resources/Images/matrix.jpg";
-	//unsigned int emissionMap = LoadTexture(emissionPath.c_str());
 
 	// Camera Stuff (Don't keep a global camera please... for the love of God...
 	//Camera mainCamera;
@@ -383,10 +296,9 @@ int main()
 	glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
-	//std::string path = "Resources/Models/backpack/backpack.obj";
-	std::filesystem::path objPath("Resources/Models/backpack/backpack.obj");
-	//std::string path = "Resources/Models/stormtrooper/StormTrooper.fbx";
-	Model mesh(objPath.c_str());
+	std::filesystem::path backpackPath("Resources/Models/backpack/backpack.obj");
+	std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
+	Model mesh(backpackPath.c_str());
 
 	// Main loop
 	while (!window.CloseWindow())
@@ -413,6 +325,8 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		// Create ImGUI class, "Editor" class? I don't want to use ImGUI for UI stuff outside of the editor so that makes sense
+
 		if (true)
 		{
 			static int counter = 0;
@@ -430,6 +344,9 @@ int main()
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 			ImGui::End();
 		}
+
+		bool doit = true;
+		//ImGui::ShowDemoWindow(&doit);
 
 		ImGui::Render();
 		
@@ -488,59 +405,6 @@ int main()
 
 		mesh.Draw(defaultShader);
 
-		/*glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);*/
-		
-		//glActiveTexture(GL_TEXTURE2);
-		//glBindTexture(GL_TEXTURE_2D, emissionMap);
-
-		//DrawManyCubes(cubePositions, defaultShader, VAO);
-		
-		if (false)
-		{
-			glBindVertexArray(VAO);
-
-			for (unsigned int i = 0; i < cubePositions.size(); i++)
-			{
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, cubePositions[i]);
-				float angle = 20.0f * i;
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-				defaultShader.SetMat4("model", model);
-
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-			}
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
-		// Draw light cube (not changing?)
-		if (false)
-		{
-			// Light cube placement and draw call
-			lightShader.Use();
-
-			for (int i = 0; i < 4; i++)
-			{
-				// set the model, view and projection matrix uniforms
-				model = glm::mat4(1.0f);
-				model = glm::translate(model, pointLightPositions[i]);
-				model = glm::scale(model, glm::vec3(0.2f));
-
-				// I need 2 different shaders...
-				lightShader.SetMat4("model", model);
-				lightShader.SetMat4("view", view);
-				lightShader.SetMat4("projection", projection);
-
-				// draw the light cube object
-				glBindVertexArray(lightVAO);
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-			}
-		}
-
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ImGUI.SwapBuffers equivalent
 		window.SwapBuffers();
 	}
@@ -551,9 +415,10 @@ int main()
 	ImGui::DestroyContext();
 
 	glDeleteVertexArrays(1, &lightVAO);
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &lightVBO);
 
+	// Close window
+	glfwDestroyWindow(window.GetWindowHandle());
 	glfwTerminate();
 
 	return 0;

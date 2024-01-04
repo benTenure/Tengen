@@ -12,6 +12,14 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 	SetupMesh();
 }
 
+Mesh::~Mesh()
+{
+	glDeleteVertexArrays(1, &m_VAO);
+	glDeleteBuffers(1, &m_VBO);
+	glDeleteBuffers(1, &m_EBO);
+	//glDeleteTextures();
+}
+
 void Mesh::Draw(Shader& shader)
 {
 	unsigned int diffuseNum = 1;
@@ -170,19 +178,19 @@ std::string Texture::ToString(TextureType textureType)
 		result = "texture_diffuse";
 		break;
 	case TextureType::NORMAL:
-		result = "texture_diffuse";
+		result = "texture_normal";
 		break;
 	case TextureType::ROUGHNESS:
-		result = "texture_diffuse";
+		result = "texture_roughness";
 		break;
 	case TextureType::SPECULAR:
-		result = "texture_diffuse";
+		result = "texture_specular";
 		break;
 	case TextureType::AMBIENT_OCCLUSION:
-		result = "texture_diffuse";
+		result = "texture_ambient_occlusion";
 		break;
 	case TextureType::HEIGHT:
-		result = "texture_diffuse";
+		result = "texture_height";
 		break;
 	default:
 		break;

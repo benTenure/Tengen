@@ -82,7 +82,7 @@
     <ExecutablePath>$(SolutionDir)\Libraries\dll;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Libraries\include;$(SolutionDir)Libraries\include\imgui\v1_90;$(SolutionDir)Runtime;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Libraries\include;$(SolutionDir)Libraries\include\imgui\v1_90;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Libraries\lib\glfw\;$(SolutionDir)Libraries\lib\assimp\;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(SolutionDir)Debug;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(SolutionDir)Libraries\dll;$(ExecutablePath)</ExecutablePath>
@@ -195,6 +195,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Editor\Editor.cpp" />
     <ClCompile Include="Runtime\Components\ComponentManager.cpp" />
     <ClCompile Include="Engine\Input\InputManager.cpp" />
     <ClCompile Include="Runtime\Components\Component.cpp" />
@@ -373,6 +374,8 @@
     <None Include="Shaders\simple.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Editor\Editor.h" />
+    <ClInclude Include="Editor\EditorDefines.h" />
     <ClInclude Include="Runtime\Components\ComponentManager.h" />
     <ClInclude Include="Engine\Input\InputManager.h" />
     <ClInclude Include="Runtime\Components\Component.h" />
