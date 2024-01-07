@@ -103,10 +103,12 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		aiFace face = mesh->mFaces[i];
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
+		{
 			indices.push_back(face.mIndices[j]);
+		}
 	}
 
-	if (mesh->mMaterialIndex >= 0)
+	if (mesh->mMaterialIndex > 0)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 

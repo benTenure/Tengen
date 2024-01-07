@@ -7,41 +7,19 @@
 class GameObject
 {
 public:
-	GameObject();
+	virtual void Input(float deltaTime);
+	virtual void Process(float deltaTime);
 
-	void Create() {} // good place to catch errors early
-
-	void Input(float deltaTime)
-	{
-		/*for (unsigned int i = 0; i < m_components.size(); i++)
-		{
-			m_components[i].Input(deltaTime);
-		}*/
-
-		/*for (auto& component : m_components)
-		{
-			component.Input(deltaTime);
-		}*/
-	}
-
-	void Process(float deltaTime)
-	{
-		/*for (unsigned int i = 0; i < m_components.size(); i++)
-		{
-			m_components[i].Process(deltaTime);
-		}*/
-
-		/*for (auto& component : m_components)
-		{
-			component.Process(deltaTime);
-		}*/
-	}
-
-	virtual void Destroy() {}
+	// The only way for components to be made.
+	void AddComponent(Component* component);
+	void DeleteComponent(Component* component);
+	Component* GetComponent(ComponentType type = ComponentType::NONE);
 
 private:
-	unsigned int m_id;
-	std::vector<Component> m_components;
+	bool DoesComponentExist(ComponentType type);
+
+	//ID m_id;
+	std::vector<Component*> m_components; //unordered_map for dealing with GO's with lots of components? O(n) really isn't that bad here though
 
 	//GUID m_guid; // look into boost or other options
 };

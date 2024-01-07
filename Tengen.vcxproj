@@ -197,6 +197,9 @@
   <ItemGroup>
     <ClCompile Include="Editor\Editor.cpp" />
     <ClCompile Include="Engine\Input\InputContext.cpp" />
+    <ClCompile Include="Runtime\GameObjectManager.cpp" />
+    <ClCompile Include="Runtime\Components\MaterialComponent.cpp" />
+    <ClCompile Include="Runtime\Components\MeshComponent.cpp" />
     <ClCompile Include="Runtime\Components\ComponentManager.cpp" />
     <ClCompile Include="Engine\Input\InputManager.cpp" />
     <ClCompile Include="Runtime\Components\Component.cpp" />
@@ -217,6 +220,7 @@
     <ClCompile Include="Libraries\source\stb.cpp" />
     <ClCompile Include="Engine\Mesh.cpp" />
     <ClCompile Include="Engine\Model.cpp" />
+    <ClCompile Include="Singleton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\include\assimp\color4.inl" />
@@ -378,6 +382,10 @@
     <ClInclude Include="Editor\Editor.h" />
     <ClInclude Include="Editor\EditorDefines.h" />
     <ClInclude Include="Engine\Input\InputContext.h" />
+    <ClInclude Include="Engine\Input\PlatformDefines.h" />
+    <ClInclude Include="Runtime\GameObjectManager.h" />
+    <ClInclude Include="Runtime\Components\MaterialComponent.h" />
+    <ClInclude Include="Runtime\Components\MeshComponent.h" />
     <ClInclude Include="Runtime\Components\ComponentManager.h" />
     <ClInclude Include="Engine\Input\InputManager.h" />
     <ClInclude Include="Runtime\Components\Component.h" />
@@ -741,6 +749,7 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Engine\Mesh.h" />
     <ClInclude Include="Engine\Model.h" />
+    <ClInclude Include="Singleton.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\awesomeface.png" />

@@ -27,6 +27,8 @@ void Mesh::Draw(Shader& shader)
 	unsigned int normalNum = 1;
 	unsigned int heightNum = 1;
 
+	shader.Use();
+
 	for (unsigned int i = 0; i < m_textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding

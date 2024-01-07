@@ -6,14 +6,17 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <stdio.h>
+#include <vector>
 
 #include "App.h"
 #include "Camera.h"
 #include "Editor/Editor.h"
 #include "Model.h"
+#include "Runtime/GameObject.h"
 #include "Shader.h"
 #include "Window.h"
-#include <vector>
+#include <Runtime/Components/MaterialComponent.h>
+#include <Runtime/Components/MeshComponent.h>
 
 
 /*
@@ -117,16 +120,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	g_mainCamera.ProcessScrollWheel(xoffset, yoffset);
 }
 
-void MoveRight()
-{
-	g_transform = glm::translate(g_transform, glm::vec3(0.1f, 0.0f, 0.0f));
-}
-
-void MoveLeft()
-{
-	g_transform = glm::translate(g_transform, glm::vec3(-0.1f, 0.0f, 0.0f));
-}
-
+// This needs to move into the intput manager
 void processInput(GLFWwindow* window)
 {
 	int pressedKey = glfwGetKey(window, GLFW_KEY_ESCAPE);
@@ -146,24 +140,19 @@ void processInput(GLFWwindow* window)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-	{
-		MoveRight();
-	}
-	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-	{
-		MoveLeft();
-	}
 }
 
 int main()
 {
 	Window window(APP_DEFAULT_PROJECT_NAME);
-	Editor editor;
+	//Editor editor;
+
+#ifdef PLATFORM_WINDOWS
+	int x = 0;
+#endif
 
 	// Setup Dear ImGui context
-	editor.Init();
+	//editor.Init();
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -194,7 +183,7 @@ int main()
 	glfwSetScrollCallback(window.GetWindowHandle(), scroll_callback);
 
 	// Keep the cursor constrained to the window and invisible
-	glfwSetInputMode(window.GetWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(window.GetWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	
 	// Configure global state of GL
 	glEnable(GL_DEPTH_TEST);
@@ -279,7 +268,7 @@ int main()
 	//glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	//std::cout << "Maximum num of vertex attributes supported: " << nrAttributes << std::endl;
 
-	// Camera Stuff (Don't keep a global camera please... for the love of God...
+	// Camera Stuff (Don't keep a global camera please... for the love of God...)
 	//Camera mainCamera;
 	
 	glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
@@ -298,7 +287,16 @@ int main()
 
 	std::filesystem::path backpackPath("Resources/Models/backpack/backpack.obj");
 	std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
-	Model mesh(backpackPath.c_str());
+	std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
+	Model backpack(backpackPath.c_str());
+	//Model cube(cubePath.c_str());
+
+	// Create Player
+	//GameObject player;
+	//MaterialComponent material(defaultShader, &player);
+	//MeshComponent mesh(backpack, &player);
+	//player.AddComponent(&material);
+	//player.AddComponent(&mesh);
 
 	// Main loop
 	while (!window.CloseWindow())
@@ -321,13 +319,13 @@ int main()
 		g_mainCamera.ProcessInput(window, g_deltaTime);
 
 		// Start the Dear ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		//ImGui_ImplOpenGL3_NewFrame();
+		//ImGui_ImplGlfw_NewFrame();
+		//ImGui::NewFrame();
 
 		// Create ImGUI class, "Editor" class? I don't want to use ImGUI for UI stuff outside of the editor so that makes sense
 
-		if (true)
+		if (false)
 		{
 			static int counter = 0;
 
@@ -345,20 +343,17 @@ int main()
 			ImGui::End();
 		}
 
-		bool doit = true;
-		//ImGui::ShowDemoWindow(&doit);
-
-		ImGui::Render();
+		//ImGui::Render();
 		
-		//Color defaultColor(0.3f, 0.396f, 0.518f, 1.0f); // Nice gray-blue color background, RGB = 77, 101, 132
-		Color defaultColor(0.f, 0.f, 0.3f, 1.0f);
+		Color defaultColor(0.3f, 0.396f, 0.518f, 1.0f); // Nice gray-blue color background, RGB = 77, 101, 132
+		//Color defaultColor(0.f, 0.f, 0.3f, 1.0f);
 		glClearColor(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a); // state-setting
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using
 
 		g_mainCamera.SetFOV(g_fov);
 
 		// Draw regular cube
-		defaultShader.Use();
+		// defaultShader.Use();
 
 		// Coordinate Stuff (OpenGL uses a right-handed coordinate system, +x to the right, +y up, +z towards me)
 		glm::mat4 model = glm::mat4(1.0f);
@@ -375,44 +370,49 @@ int main()
 		glm::vec3 ambient(0.2f, 0.2f, 0.2f);
 		glm::vec3 diffuse(0.5f, 0.5f, 0.5f);
 		glm::vec3 specular(1.0f, 1.0f, 1.0f);
+		
+		// Light stuff
+		{
+			// Directional Light
+			//defaultShader.SetVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+			//defaultShader.SetVec3("dirLight.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+			//defaultShader.SetVec3("dirLight.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+			//defaultShader.SetVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-		// Directional Light
-		//defaultShader.SetVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		//defaultShader.SetVec3("dirLight.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
-		//defaultShader.SetVec3("dirLight.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
-		//defaultShader.SetVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+			// Point Light
+			//defaultShader.SetVec3("pointLights[0].position", pointLightPositions[0]);
+			//defaultShader.SetFloat("pointLights[0].constant", 1.0f);
+			//defaultShader.SetFloat("pointLights[0].linear", 0.09f);
+			//defaultShader.SetFloat("pointLights[0].quadratic", 0.032f);
+			//defaultShader.SetVec3("pointLights[0].ambient", ambient);
+			//defaultShader.SetVec3("pointLights[0].diffuse", diffuse);
+			//defaultShader.SetVec3("pointLights[0].specular", specular);
 
-		// Point Light
-		//defaultShader.SetVec3("pointLights[0].position", pointLightPositions[0]);
-		//defaultShader.SetFloat("pointLights[0].constant", 1.0f);
-		//defaultShader.SetFloat("pointLights[0].linear", 0.09f);
-		//defaultShader.SetFloat("pointLights[0].quadratic", 0.032f);
-		//defaultShader.SetVec3("pointLights[0].ambient", ambient);
-		//defaultShader.SetVec3("pointLights[0].diffuse", diffuse);
-		//defaultShader.SetVec3("pointLights[0].specular", specular);
+			// Flashlight (SpotLight)
+			//defaultShader.SetVec3("spotLight.position", g_mainCamera.GetPosition());
+			//defaultShader.SetVec3("spotLight.direction", g_mainCamera.GetFront());
+			//defaultShader.SetFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+			//defaultShader.SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+			//defaultShader.SetFloat("spotLight.constant", 1.0f);
+			//defaultShader.SetFloat("spotLight.linear", 0.09f);
+			//defaultShader.SetFloat("spotLight.quadratic", 0.032f);
+			//defaultShader.SetVec3("spotLight.ambient", ambient);
+			//defaultShader.SetVec3("spotLight.diffuse", diffuse);
+			//defaultShader.SetVec3("spotLight.specular", specular);
+		}
 
-		// Flashlight (SpotLight)
-		//defaultShader.SetVec3("spotLight.position", g_mainCamera.GetPosition());
-		//defaultShader.SetVec3("spotLight.direction", g_mainCamera.GetFront());
-		//defaultShader.SetFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		//defaultShader.SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-		//defaultShader.SetFloat("spotLight.constant", 1.0f);
-		//defaultShader.SetFloat("spotLight.linear", 0.09f);
-		//defaultShader.SetFloat("spotLight.quadratic", 0.032f);
-		//defaultShader.SetVec3("spotLight.ambient", ambient);
-		//defaultShader.SetVec3("spotLight.diffuse", diffuse);
-		//defaultShader.SetVec3("spotLight.specular", specular);
+		//cube.Draw(defaultShader);
+		backpack.Draw(defaultShader);
+		//player.Process(g_deltaTime);
 
-		mesh.Draw(defaultShader);
-
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ImGUI.SwapBuffers equivalent
+		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ImGUI.SwapBuffers equivalent
 		window.SwapBuffers();
 	}
 
 	// IMGUI cleanup
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	//ImGui_ImplOpenGL3_Shutdown();
+	//ImGui_ImplGlfw_Shutdown();
+	//ImGui::DestroyContext();
 
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteBuffers(1, &lightVBO);
