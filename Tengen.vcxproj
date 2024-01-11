@@ -383,6 +383,7 @@
     <ClInclude Include="Editor\EditorDefines.h" />
     <ClInclude Include="Engine\Input\InputContext.h" />
     <ClInclude Include="Engine\Input\PlatformDefines.h" />
+    <ClInclude Include="Engine\Renderer\OpenGLDebug.h" />
     <ClInclude Include="Runtime\GameObjectManager.h" />
     <ClInclude Include="Runtime\Components\MaterialComponent.h" />
     <ClInclude Include="Runtime\Components\MeshComponent.h" />

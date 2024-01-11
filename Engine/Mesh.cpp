@@ -14,9 +14,9 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 Mesh::~Mesh()
 {
-	glDeleteVertexArrays(1, &m_VAO);
-	glDeleteBuffers(1, &m_VBO);
-	glDeleteBuffers(1, &m_EBO);
+	//glDeleteVertexArrays(1, &m_VAO);
+	//glDeleteBuffers(1, &m_VBO);
+	//glDeleteBuffers(1, &m_EBO);
 	//glDeleteTextures();
 }
 
@@ -32,9 +32,10 @@ void Mesh::Draw(Shader& shader)
 	for (unsigned int i = 0; i < m_textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+		
 		// retrieve texture number (the N in diffuse_textureN)
 		std::string number; 
-		std::string name = Texture::ToString(m_textures[i].m_type);// = m_textures[i].m_type;
+		std::string name = Texture::ToString(m_textures[i].m_type);
 
 		switch (m_textures[i].m_type)
 		{
@@ -61,11 +62,11 @@ void Mesh::Draw(Shader& shader)
 		glBindTexture(GL_TEXTURE_2D, m_textures[i].m_id);
 	}
 
+	glActiveTexture(GL_TEXTURE0);
+	
 	glBindVertexArray(m_VAO);
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
-	
-	glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::AddVertex(Vertex vertex)
@@ -90,12 +91,12 @@ void Mesh::SetupMesh()
     glGenBuffers(1, &m_EBO);
   
     glBindVertexArray(m_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), &m_indices[0], GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);

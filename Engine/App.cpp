@@ -147,10 +147,6 @@ int main()
 	Window window(APP_DEFAULT_PROJECT_NAME);
 	//Editor editor;
 
-#ifdef PLATFORM_WINDOWS
-	int x = 0;
-#endif
-
 	// Setup Dear ImGui context
 	//editor.Init();
 	IMGUI_CHECKVERSION();
@@ -188,8 +184,8 @@ int main()
 	// Configure global state of GL
 	glEnable(GL_DEPTH_TEST);
 
-	//Shader defaultShader("Shaders/default.vert", "Shaders/default.frag");
-	Shader defaultShader("Shaders/simple.vert", "Shaders/simple.frag");
+	Shader defaultShader("Shaders/default.vert", "Shaders/default.frag");
+	//Shader defaultShader("Shaders/simple.vert", "Shaders/simple.frag");
 	Shader lightShader("Shaders/light.vert", "Shaders/light.frag");
 
 	// We'll use one cube for both the box and light for now
@@ -251,7 +247,7 @@ int main()
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
-	// Light
+	// Light (Need to create some kind of Light class. It should have its own Material, A simple cube mesh for now?)
 	unsigned int lightVAO, lightVBO;
 	glGenVertexArrays(1, &lightVAO);
 	glGenBuffers(1, &lightVBO);
@@ -273,10 +269,10 @@ int main()
 	
 	glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
 
-	//defaultShader.Use();
-	//defaultShader.SetInt("material.diffuse", 0);
-	//defaultShader.SetInt("material.specular", 1);
-	//defaultShader.SetInt("material.emission", 2);
+	defaultShader.Use();
+	defaultShader.SetInt("material.diffuse", 0);
+	defaultShader.SetInt("material.specular", 1);
+	defaultShader.SetInt("material.emission", 2);
 
 	glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.7f,  0.2f,  2.0f),
@@ -292,11 +288,11 @@ int main()
 	//Model cube(cubePath.c_str());
 
 	// Create Player
-	//GameObject player;
-	//MaterialComponent material(defaultShader, &player);
-	//MeshComponent mesh(backpack, &player);
-	//player.AddComponent(&material);
-	//player.AddComponent(&mesh);
+	GameObject player;
+	MaterialComponent material(defaultShader, &player);
+	MeshComponent mesh(backpack, &player);
+	player.AddComponent(&material);
+	player.AddComponent(&mesh);
 
 	// Main loop
 	while (!window.CloseWindow())
@@ -352,8 +348,7 @@ int main()
 
 		g_mainCamera.SetFOV(g_fov);
 
-		// Draw regular cube
-		// defaultShader.Use();
+		defaultShader.Use();
 
 		// Coordinate Stuff (OpenGL uses a right-handed coordinate system, +x to the right, +y up, +z towards me)
 		glm::mat4 model = glm::mat4(1.0f);
@@ -367,9 +362,9 @@ int main()
 		//defaultShader.SetVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 		//defaultShader.SetFloat("material.shininess", 320.0f);
 
-		glm::vec3 ambient(0.2f, 0.2f, 0.2f);
-		glm::vec3 diffuse(0.5f, 0.5f, 0.5f);
-		glm::vec3 specular(1.0f, 1.0f, 1.0f);
+		//glm::vec3 ambient(0.2f, 0.2f, 0.2f);
+		//glm::vec3 diffuse(0.5f, 0.5f, 0.5f);
+		//glm::vec3 specular(1.0f, 1.0f, 1.0f);
 		
 		// Light stuff
 		{
@@ -402,8 +397,8 @@ int main()
 		}
 
 		//cube.Draw(defaultShader);
-		backpack.Draw(defaultShader);
-		//player.Process(g_deltaTime);
+		//backpack.Draw(defaultShader);
+		player.Process(g_deltaTime);
 
 		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ImGUI.SwapBuffers equivalent
 		window.SwapBuffers();
@@ -417,9 +412,7 @@ int main()
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteBuffers(1, &lightVBO);
 
-	// Close window
-	glfwDestroyWindow(window.GetWindowHandle());
-	glfwTerminate();
+	window.Exit();
 
 	return 0;
 }

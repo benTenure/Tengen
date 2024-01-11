@@ -61,15 +61,6 @@ public:
 
 	static std::string ToString(TextureType textureType);
 
-	/*unsigned int GetID();
-
-	void SetType(TextureType type);
-	TextureType GetType();
-
-	void SetPath(std::filesystem::path path);
-	std::filesystem::path GetPath();*/
-
-//private:
 	unsigned int m_id;
 	TextureType m_type;
 	std::filesystem::path m_path;
