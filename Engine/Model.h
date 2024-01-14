@@ -11,35 +11,23 @@
 #include "Shader.h"
 #include "Mesh.h"
 
-// There must be a solution to this double namespace nonsense
-typedef std::filesystem::path Path;
-
 class Model
 {
 public:
-	Model()
-		: m_meshes()
-		, m_loadedTextures()
-		, m_directory("")
-		, m_applyGammaCorrection(false)
-	{}
-
-	Model(Path path, bool gamma = false)
-		: m_applyGammaCorrection(gamma)
-	{
-		LoadModel(path);
-	}
+	Model();
+	Model(std::filesystem::path path, bool gamma = false);
+	~Model();
 
 	void Draw(Shader& shader);
 
 private:
-	void LoadModel(const Path &path);
+	void LoadModel(const std::filesystem::path &path);
 	void ProcessNode(aiNode* node, const aiScene* scene);
-	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType textureType);
-	
-	std::vector<Mesh> m_meshes;
-	std::vector<Texture> m_loadedTextures;
+	Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene);
+	std::vector<Texture*> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType textureType);
+
+	std::vector<Mesh*> m_meshes;
+	std::vector<Texture*> m_loadedTextures;
 	std::string m_directory;
 	bool m_applyGammaCorrection;
 };

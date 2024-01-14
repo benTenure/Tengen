@@ -13,13 +13,13 @@ class MeshComponent : public Component
 
 public:
 	MeshComponent() = delete;
-	MeshComponent(Model model, GameObject* parent);
+	MeshComponent(Model* model, GameObject* parent);
 
 	void Process(float deltaTime) override;
 
-	void SetModel(Model model);
+	void SetModel(Model* model);
 
 private:
-	Model m_model;
+	Model* m_model;
 };
 

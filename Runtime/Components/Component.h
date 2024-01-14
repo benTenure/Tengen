@@ -19,7 +19,7 @@ enum class ComponentType : uint8_t
 // GameObjects have 0 functionality on their own. Just an empty
 // container full of nothing.
 
-// Forward declaration
+// Forward declaration (fix for cyclic dependency)
 class GameObject;
 
 class Component

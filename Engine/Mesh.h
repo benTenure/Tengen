@@ -57,6 +57,12 @@ public:
 		, m_path("")
 	{}
 
+	Texture(int id, TextureType type, std::string path)
+		: m_id(id)
+		, m_type(type)
+		, m_path(path)
+	{}
+
 	unsigned int LoadTextureFromFile(const char* path, const std::string& directory, bool gamma);
 
 	static std::string ToString(TextureType textureType);
@@ -69,14 +75,14 @@ public:
 class Mesh
 {
 public:
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture*> textures);
 	~Mesh();
 	
 	void Draw(Shader& shader); // I would really like the ability to assign shaders to objects, keep things together. But accessing an existing shader is better. Override maybe?
 
 	void AddVertex(Vertex vertex);
 	void AddIndex(unsigned int index);
-	void AddTexture(Texture texture);
+	void AddTexture(Texture* texture);
 
 private:
 	void SetupMesh();
@@ -87,6 +93,6 @@ private:
 
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
-	std::vector<Texture> m_textures;
+	std::vector<Texture*> m_textures; // Meshes do not delete textures! Only Models!
 };
 

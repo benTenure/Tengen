@@ -285,12 +285,13 @@ int main()
 	std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
 	std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
 	Model backpack(backpackPath.c_str());
+	Model backpack2(backpackPath.c_str());
 	//Model cube(cubePath.c_str());
 
 	// Create Player
 	GameObject player;
 	MaterialComponent material(defaultShader, &player);
-	MeshComponent mesh(backpack, &player);
+	MeshComponent mesh(&backpack, &player); // THIS ONLY WORKS IN THIS SCOPE.
 	player.AddComponent(&material);
 	player.AddComponent(&mesh);
 

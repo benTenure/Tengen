@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
 // Moving vectors like this good? Seem bad? Slow.
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture*> textures)
 	: m_vertices(vertices)
 	, m_indices(indices)
 	, m_textures(textures)
@@ -14,10 +14,9 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 Mesh::~Mesh()
 {
-	//glDeleteVertexArrays(1, &m_VAO);
-	//glDeleteBuffers(1, &m_VBO);
-	//glDeleteBuffers(1, &m_EBO);
-	//glDeleteTextures();
+	glDeleteVertexArrays(1, &m_VAO);
+	glDeleteBuffers(1, &m_VBO);
+	glDeleteBuffers(1, &m_EBO);
 }
 
 void Mesh::Draw(Shader& shader)
@@ -35,31 +34,41 @@ void Mesh::Draw(Shader& shader)
 		
 		// retrieve texture number (the N in diffuse_textureN)
 		std::string number; 
-		std::string name = Texture::ToString(m_textures[i].m_type);
+		std::string name = Texture::ToString(m_textures[i]->m_type);
 
-		switch (m_textures[i].m_type)
+		switch (m_textures[i]->m_type)
 		{
 		case TextureType::DIFFUSE:
+		{
 			number = std::to_string(diffuseNum++);
 			break;
+		}
 		case TextureType::SPECULAR:
+		{
 			number = std::to_string(specularNum++);
 			break;
+		}
 		case TextureType::NORMAL:
+		{
 			number = std::to_string(normalNum++);
 			break;
+		}
 		case TextureType::HEIGHT:
+		{
 			number = std::to_string(heightNum++);
 			break;
+		}
 		default:
+		{
 			break;
+		}
 		}
 
 		// now set the sampler to the correct texture unit
 		glUniform1i(glGetUniformLocation(shader.GetID(), (name + number).c_str()), i);
 
 		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_2D, m_textures[i].m_id);
+		glBindTexture(GL_TEXTURE_2D, m_textures[i]->m_id);
 	}
 
 	glActiveTexture(GL_TEXTURE0);
@@ -79,7 +88,7 @@ void Mesh::AddIndex(unsigned int index)
 	m_indices.push_back(index);
 }
 
-void Mesh::AddTexture(Texture texture)
+void Mesh::AddTexture(Texture* texture)
 {
 	m_textures.push_back(texture);
 }

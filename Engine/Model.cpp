@@ -1,16 +1,44 @@
 #include "Model.h"
 
 #include <stdio.h>
+#include <utility>
 
-void Model::Draw(Shader& shader)
+Model::Model()
+	: m_meshes()
+	, m_loadedTextures()
+	, m_directory("")
+	, m_applyGammaCorrection(false)
+{}
+
+
+Model::Model(std::filesystem::path path, bool gamma)
+	: m_applyGammaCorrection(gamma)
 {
-	for (Mesh& mesh : m_meshes)
+	LoadModel(path);
+}
+
+Model::~Model()
+{
+	for (auto mesh : m_meshes)
 	{
-		mesh.Draw(shader);
+		delete mesh;
+	}
+
+	for (auto texture : m_loadedTextures)
+	{
+		delete texture;
 	}
 }
 
-void Model::LoadModel(const Path &path)
+void Model::Draw(Shader& shader)
+{
+	for (auto mesh : m_meshes)
+	{
+		mesh->Draw(shader);
+	}
+}
+
+void Model::LoadModel(const std::filesystem::path &path)
 {
 	std::string strPath = path.string();
 	Assimp::Importer importer;
@@ -43,11 +71,11 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<Texture*> textures;
 
 	// Vertex Processing
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -112,26 +140,25 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::DIFFUSE);
+		std::vector<Texture*> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::DIFFUSE);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-		std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::SPECULAR);
+		std::vector<Texture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::SPECULAR);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		
-		std::vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, TextureType::NORMAL); //aiTextureType_NORMALS seems to be the actual option??
+		std::vector<Texture*> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, TextureType::NORMAL); //aiTextureType_NORMALS seems to be the actual option??
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-		std::vector<Texture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, TextureType::HEIGHT);
+		std::vector<Texture*> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, TextureType::HEIGHT);
 		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 	}
 
-	return Mesh(vertices, indices, textures);
+	return new Mesh(vertices, indices, textures);
 }
 
-// TODO: I hate this function. This absolutely needs to be cleaned up. This does NOTHING with the material??? What's he doing bro
-std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType textureType)
+std::vector<Texture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType textureType)
 {
-	std::vector<Texture> textures;
+	std::vector<Texture*> textures;
 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
@@ -142,7 +169,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 		for (unsigned int j = 0; j < m_loadedTextures.size(); j++)
 		{
-			if (m_loadedTextures[j].m_path.string().compare(str.C_Str()) == 0)
+			if (m_loadedTextures[j]->m_path.string().compare(str.C_Str()) == 0)
 			{
 				textures.push_back(m_loadedTextures[j]);
 				skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
@@ -152,10 +179,11 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 		if (!skip)
 		{
-			Texture texture;
-			texture.m_id = texture.LoadTextureFromFile(str.C_Str(), m_directory, m_applyGammaCorrection);
-			texture.m_type = textureType;
-			texture.m_path = str.C_Str();
+			// This is bad. Do not keep this here.
+			Texture* texture = new Texture();
+			texture->m_id = texture->LoadTextureFromFile(str.C_Str(), m_directory, m_applyGammaCorrection);
+			texture->m_type = textureType;
+			texture->m_path = str.C_Str();
 
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture);
