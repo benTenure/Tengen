@@ -138,17 +138,13 @@ void Mesh::SetupMesh()
     glBindVertexArray(0);
 }
 
-unsigned int Texture::LoadTextureFromFile(const char* path, const std::string& directory, bool gamma)
+void Texture::LoadTextureFromFile()
 {
-	std::string filename = path;
-	filename = directory + '/' + filename;
-
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
+	glGenTextures(1, &m_id);
 
 	int width, height, numComponents;
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &numComponents, 0);
+	unsigned char* data = stbi_load(m_path.string().c_str(), &width, &height, &numComponents, 0);
 
 	if (data)
 	{
@@ -161,7 +157,7 @@ unsigned int Texture::LoadTextureFromFile(const char* path, const std::string& d
 		else if (numComponents == 4)
 			format = GL_RGBA;
 
-		glBindTexture(GL_TEXTURE_2D, textureID);
+		glBindTexture(GL_TEXTURE_2D, m_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -172,12 +168,10 @@ unsigned int Texture::LoadTextureFromFile(const char* path, const std::string& d
 	}
 	else
 	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
+		std::cout << "Texture failed to load at path: " << m_path << std::endl;
 	}
 
 	stbi_image_free(data);
-
-	return textureID;
 }
 
 std::string Texture::ToString(TextureType textureType)

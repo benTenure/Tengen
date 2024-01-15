@@ -40,7 +40,7 @@
 	Input:
 	- GLFW?
 	- might be something better
-	- dependent on the backend I choose for windows
+	- dependent on the backend I choose for windows (literal, not OS)
 */
 
 /*
@@ -275,18 +275,20 @@ int main()
 	defaultShader.SetInt("material.emission", 2);
 
 	glm::vec3 pointLightPositions[] = {
-	glm::vec3(0.7f,  0.2f,  2.0f),
-	glm::vec3(2.3f, -3.3f, -4.0f),
-	glm::vec3(-4.0f,  2.0f, -12.0f),
-	glm::vec3(0.0f,  0.0f, -3.0f)
+		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
 	std::filesystem::path backpackPath("Resources/Models/backpack/backpack.obj");
 	std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
 	std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
-	Model backpack(backpackPath.c_str());
-	Model backpack2(backpackPath.c_str());
-	//Model cube(cubePath.c_str());
+	std::filesystem::path cameraPath= "Resources/Models/camera/Camera_01_4k.fbx";
+	std::filesystem::path sponzaPath= "Resources/Models/Sponza-master/sponza.obj";
+
+	
+	Model backpack(sponzaPath.c_str());
 
 	// Create Player
 	GameObject player;

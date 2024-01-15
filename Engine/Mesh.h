@@ -57,19 +57,31 @@ public:
 		, m_path("")
 	{}
 
-	Texture(int id, TextureType type, std::string path)
-		: m_id(id)
+	Texture(TextureType type, std::filesystem::path pathToTexture)
+		: m_id(0)
 		, m_type(type)
-		, m_path(path)
-	{}
+		, m_path(pathToTexture)
+	{
+		LoadTextureFromFile();
+	}
+	
+	Texture(TextureType type, char* pathToTexture)
+		: m_id(0)
+		, m_type(type)
+		, m_path(pathToTexture)
+	{
+		LoadTextureFromFile();
+	}
 
-	unsigned int LoadTextureFromFile(const char* path, const std::string& directory, bool gamma);
 
 	static std::string ToString(TextureType textureType);
 
 	unsigned int m_id;
 	TextureType m_type;
 	std::filesystem::path m_path;
+	
+private:
+	void LoadTextureFromFile();
 };
 
 class Mesh

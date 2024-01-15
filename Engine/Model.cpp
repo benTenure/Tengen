@@ -162,14 +162,15 @@ std::vector<Texture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType
 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
-		aiString str;
-		mat->GetTexture(type, i, &str);
+		aiString filename;
+		mat->GetTexture(type, i, &filename); 
+		std::filesystem::path pathToTexture(m_directory + '/' + filename.C_Str());
 
 		bool skip = false;
 
 		for (unsigned int j = 0; j < m_loadedTextures.size(); j++)
 		{
-			if (m_loadedTextures[j]->m_path.string().compare(str.C_Str()) == 0)
+			if (m_loadedTextures[j]->m_path.string().compare(pathToTexture.string()) == 0)
 			{
 				textures.push_back(m_loadedTextures[j]);
 				skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
@@ -179,12 +180,7 @@ std::vector<Texture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType
 
 		if (!skip)
 		{
-			// This is bad. Do not keep this here.
-			Texture* texture = new Texture();
-			texture->m_id = texture->LoadTextureFromFile(str.C_Str(), m_directory, m_applyGammaCorrection);
-			texture->m_type = textureType;
-			texture->m_path = str.C_Str();
-
+			Texture* texture = new Texture(textureType, pathToTexture);
 			textures.push_back(texture);
 			m_loadedTextures.push_back(texture);
 		}
