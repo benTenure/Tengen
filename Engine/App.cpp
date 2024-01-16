@@ -65,6 +65,9 @@ static float g_lastX = Window::WINDOW_DEFAULT_WIDTH / 2.0f;
 static float g_lastY = Window::WINDOW_DEFAULT_HEIGHT / 2.0f;
 static bool g_firstMouse = true;
 
+static constexpr float NEAR_CLIPPING_PLANE = 0.1f;
+static constexpr float FAR_CLIPPING_PLANE = 10000.0f;
+
 Camera g_mainCamera;
 
 struct Color
@@ -183,6 +186,9 @@ int main()
 	
 	// Configure global state of GL
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 	Shader defaultShader("Shaders/default.vert", "Shaders/default.frag");
 	//Shader defaultShader("Shaders/simple.vert", "Shaders/simple.frag");
@@ -287,7 +293,6 @@ int main()
 	std::filesystem::path cameraPath= "Resources/Models/camera/Camera_01_4k.fbx";
 	std::filesystem::path sponzaPath= "Resources/Models/Sponza-master/sponza.obj";
 
-	
 	Model backpack(sponzaPath.c_str());
 
 	// Create Player
@@ -356,7 +361,7 @@ int main()
 		// Coordinate Stuff (OpenGL uses a right-handed coordinate system, +x to the right, +y up, +z towards me)
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = g_mainCamera.Update();
-		glm::mat4 projection = glm::perspective(glm::radians(g_mainCamera.GetFOV()), static_cast<float>(Window::WINDOW_DEFAULT_WIDTH) / static_cast<float>(Window::WINDOW_DEFAULT_HEIGHT), 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(g_mainCamera.GetFOV()), static_cast<float>(Window::WINDOW_DEFAULT_WIDTH) / static_cast<float>(Window::WINDOW_DEFAULT_HEIGHT), NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
 		defaultShader.SetMat4("model", model);
 		defaultShader.SetMat4("view", view);
 		defaultShader.SetMat4("projection", projection);

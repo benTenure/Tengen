@@ -69,6 +69,17 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
+// Useful for visualizing depth. Maybe move out into its own shader.
+//float depth = LinearizeDepth(gl_FragCoord.z) / 10000.0;
+//FragColor = vec4(vec3(depth), 1.0);
+float LinearizeDepth(float depth) 
+{
+    float near = 0.1;
+    float far = 10000.0;
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main()
 {
     // properties
@@ -86,7 +97,6 @@ void main()
     // phase 3: Spot light
     //result += CalcSpotLight(spotLight, norm, FragPos, viewDir);    
     
-    //FragColor = vec4(result, 1.0);
     FragColor = texture(material.diffuse, TexCoords);
 }
 
