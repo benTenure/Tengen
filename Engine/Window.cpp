@@ -93,6 +93,15 @@ void Window::Exit()
 	glfwTerminate();
 }
 
+int Window::GetNumOfMaxVertexAttributes()
+{
+	int maxAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttributes);
+	//std::cout << "Maximum num of vertex attributes supported: " << nrAttributes << std::endl;
+
+	return maxAttributes;
+}
+
 void APIENTRY Window::PrintDebugMessages(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
 	// ignore non-significant error/warning codes

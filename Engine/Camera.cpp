@@ -29,7 +29,7 @@ glm::mat4 Camera::Update()
 
 void Camera::ProcessInput(Window window, float deltaTime)
 {
-	const float cameraSpeed = 1000.0f * deltaTime; // adjust accordingly
+	const float cameraSpeed = 10.0f * deltaTime; // adjust accordingly
 	if (glfwGetKey(window.GetWindowHandle(), GLFW_KEY_W) == GLFW_PRESS)
 	{
 		m_position += cameraSpeed * m_front;

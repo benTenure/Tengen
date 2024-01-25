@@ -99,6 +99,9 @@
     <ClCompile Include="Singleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Runtime\Components\CubeMapComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\include\glm\detail\func_common.inl">
@@ -539,6 +542,10 @@
     </None>
     <None Include="Shaders\simple.vert" />
     <None Include="Shaders\simple.frag" />
+    <None Include="Shaders\renderQuad.vert" />
+    <None Include="Shaders\renderQuad.frag" />
+    <None Include="Shaders\skybox.frag" />
+    <None Include="Shaders\skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Libraries\include\glad\glad.h">
@@ -1655,6 +1662,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Renderer\OpenGLDebug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\Components\CubeMapComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

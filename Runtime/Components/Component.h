@@ -5,12 +5,14 @@
 // Should an ID be a shared_ptr wrapper? Eh...
 // typedef unsigned int ID;
 
+// This is feeling worse the more I look at it
 enum class ComponentType : uint8_t
 {
 	NONE = 0,
 	MESH,
 	MATERIAL,
 	COLLIDER,
+	CUBEMAP
 };
 
 // Implements each of the required functions so that the component

@@ -17,6 +17,8 @@
 #include "Window.h"
 #include <Runtime/Components/MaterialComponent.h>
 #include <Runtime/Components/MeshComponent.h>
+#include <Runtime/Components/CubeMapComponent.h>
+
 
 
 /*
@@ -183,102 +185,73 @@ int main()
 
 	// Keep the cursor constrained to the window and invisible
 	glfwSetInputMode(window.GetWindowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	
+
 	// Configure global state of GL
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+	glEnable(GL_CULL_FACE);
+	//glCullFace(): Change which side of the face we care about. Defaults to GL_BACK.
+	//glFrontFace(): Choose the direction of indices for determining the face's side. Defaults to GL_CW (Clockwise)
+
+	// Setup a FrameBuffer
+	unsigned int fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	unsigned int textureColorbuffer;
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Window::WINDOW_DEFAULT_WIDTH, Window::WINDOW_DEFAULT_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// attach it to currently bound frame buffer object
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	// glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600); // Causes a really weird bug worth looking at for ideas
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, Window::WINDOW_DEFAULT_WIDTH, Window::WINDOW_DEFAULT_HEIGHT);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not completSource.cppe!" << std::endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	Shader defaultShader("Shaders/default.vert", "Shaders/default.frag");
-	//Shader defaultShader("Shaders/simple.vert", "Shaders/simple.frag");
 	Shader lightShader("Shaders/light.vert", "Shaders/light.frag");
-
-	// We'll use one cube for both the box and light for now
-	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-	};
-
-	std::vector<glm::vec3> cubePositions = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
+	Shader quadShader("Shaders/renderQuad.vert", "Shaders/renderQuad.frag");
+	Shader skyboxShader("Shaders/skybox.vert", "Shaders/skybox.frag");
 
 	// Light (Need to create some kind of Light class. It should have its own Material, A simple cube mesh for now?)
 	unsigned int lightVAO, lightVBO;
 	glGenVertexArrays(1, &lightVAO);
 	glGenBuffers(1, &lightVBO);
 
-	glBindVertexArray(lightVAO); 
+	glBindVertexArray(lightVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	// TODO: Put this in an actual function for OpenGL context. It could actually be helpful
-	// Ping the GPU for the max number of vertex attributes it can support
-	//int nrAttributes;
-	//glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	//std::cout << "Maximum num of vertex attributes supported: " << nrAttributes << std::endl;
-
-	// Camera Stuff (Don't keep a global camera please... for the love of God...)
-	//Camera mainCamera;
-	
 	glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
 
 	defaultShader.Use();
 	defaultShader.SetInt("material.diffuse", 0);
 	defaultShader.SetInt("material.specular", 1);
 	defaultShader.SetInt("material.emission", 2);
+
+	quadShader.Use();
+	quadShader.SetInt("screenTexture", 0);
 
 	glm::vec3 pointLightPositions[] = {
 		glm::vec3(0.7f,  0.2f,  2.0f),
@@ -287,13 +260,36 @@ int main()
 		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
+	float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
 	std::filesystem::path backpackPath("Resources/Models/backpack/backpack.obj");
 	std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
 	std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
-	std::filesystem::path cameraPath= "Resources/Models/camera/Camera_01_4k.fbx";
-	std::filesystem::path sponzaPath= "Resources/Models/Sponza-master/sponza.obj";
+	std::filesystem::path cameraPath = "Resources/Models/camera/Camera_01_4k.fbx";
+	std::filesystem::path sponzaPath = "Resources/Models/Sponza-master/sponza.obj";
 
-	Model backpack(sponzaPath.c_str());
+	// Paths for the skybox
+	std::vector <std::filesystem::path> skyboxTexturePaths
+	{
+		std::filesystem::path ("Resources/Images/Skybox/right.jpg"),
+		std::filesystem::path ("Resources/Images/Skybox/left.jpg"),
+		std::filesystem::path ("Resources/Images/Skybox/top.jpg"),
+		std::filesystem::path ("Resources/Images/Skybox/bottom.jpg"),
+		std::filesystem::path("Resources/Images/Skybox/front.jpg"),
+		std::filesystem::path("Resources/Images/Skybox/back.jpg"),
+	};
+
+	//Model backpack(sponzaPath.c_str());
+	Model backpack(backpackPath.c_str());
 
 	// Create Player
 	GameObject player;
@@ -301,6 +297,26 @@ int main()
 	MeshComponent mesh(&backpack, &player); // THIS ONLY WORKS IN THIS SCOPE.
 	player.AddComponent(&material);
 	player.AddComponent(&mesh);
+
+	// Create skybox
+	GameObject skybox;
+	CubeMapComponent cubeMap(skyboxTexturePaths, skyboxShader, &skybox);
+	skybox.AddComponent(&cubeMap);
+
+	// Render quad
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glBindVertexArray(0);
+
+	Color defaultColor(0.3f, 0.396f, 0.518f, 1.0f); // Nice gray-blue color background, RGB = 77, 101, 132
 
 	// Main loop
 	while (!window.CloseWindow())
@@ -322,13 +338,19 @@ int main()
 		window.ProcessInput();
 		g_mainCamera.ProcessInput(window, g_deltaTime);
 
+		// Change framebuffer to our texture buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glEnable(GL_DEPTH_TEST);
+
+		glClearColor(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a); // state-setting
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using
+
 		// Start the Dear ImGui frame
 		//ImGui_ImplOpenGL3_NewFrame();
 		//ImGui_ImplGlfw_NewFrame();
 		//ImGui::NewFrame();
 
 		// Create ImGUI class, "Editor" class? I don't want to use ImGUI for UI stuff outside of the editor so that makes sense
-
 		if (false)
 		{
 			static int counter = 0;
@@ -346,13 +368,7 @@ int main()
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 			ImGui::End();
 		}
-
 		//ImGui::Render();
-		
-		Color defaultColor(0.3f, 0.396f, 0.518f, 1.0f); // Nice gray-blue color background, RGB = 77, 101, 132
-		//Color defaultColor(0.f, 0.f, 0.3f, 1.0f);
-		glClearColor(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a); // state-setting
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using
 
 		g_mainCamera.SetFOV(g_fov);
 
@@ -366,7 +382,6 @@ int main()
 		defaultShader.SetMat4("view", view);
 		defaultShader.SetMat4("projection", projection);
 		//defaultShader.SetVec3("viewPos", g_mainCamera.GetPosition());
-
 		//defaultShader.SetVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 		//defaultShader.SetFloat("material.shininess", 320.0f);
 
@@ -404,9 +419,25 @@ int main()
 			//defaultShader.SetVec3("spotLight.specular", specular);
 		}
 
-		//cube.Draw(defaultShader);
-		//backpack.Draw(defaultShader);
+		// Render the skybox first
+		skyboxShader.Use();
+		skyboxShader.SetMat4("view", glm::mat4(glm::mat3(g_mainCamera.Update())));
+		skyboxShader.SetMat4("projection", projection);
+		skybox.Process(currentFrame);
+
+
 		player.Process(g_deltaTime);
+
+		// Render texture to normal buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+		glClearColor(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		quadShader.Use();
+		glBindVertexArray(quadVAO);
+		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ImGUI.SwapBuffers equivalent
 		window.SwapBuffers();

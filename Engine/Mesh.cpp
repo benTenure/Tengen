@@ -143,7 +143,7 @@ void Texture::LoadTextureFromFile()
 	glGenTextures(1, &m_id);
 
 	int width, height, numComponents;
-	stbi_set_flip_vertically_on_load(true);
+	//stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load(m_path.string().c_str(), &width, &height, &numComponents, 0);
 
 	if (data)
