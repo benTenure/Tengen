@@ -38,30 +38,30 @@ void Mesh::Draw(Shader& shader)
 
 		switch (m_textures[i]->m_type)
 		{
-		case TextureType::DIFFUSE:
-		{
-			number = std::to_string(diffuseNum++);
-			break;
-		}
-		case TextureType::SPECULAR:
-		{
-			number = std::to_string(specularNum++);
-			break;
-		}
-		case TextureType::NORMAL:
-		{
-			number = std::to_string(normalNum++);
-			break;
-		}
-		case TextureType::HEIGHT:
-		{
-			number = std::to_string(heightNum++);
-			break;
-		}
-		default:
-		{
-			break;
-		}
+			case TextureType::DIFFUSE:
+			{
+				number = std::to_string(diffuseNum++);
+				break;
+			}
+			case TextureType::SPECULAR:
+			{
+				number = std::to_string(specularNum++);
+				break;
+			}
+			case TextureType::NORMAL:
+			{
+				number = std::to_string(normalNum++);
+				break;
+			}
+			case TextureType::HEIGHT:
+			{
+				number = std::to_string(heightNum++);
+				break;
+			}
+			default:
+			{
+				break;
+			}
 		}
 
 		// now set the sampler to the correct texture unit

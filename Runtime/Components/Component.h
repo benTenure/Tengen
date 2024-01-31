@@ -12,7 +12,8 @@ enum class ComponentType : uint8_t
 	MESH,
 	MATERIAL,
 	COLLIDER,
-	CUBEMAP
+	CUBEMAP,
+	PLAYERCONTROLLER
 };
 
 // Implements each of the required functions so that the component

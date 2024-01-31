@@ -42,7 +42,7 @@ void Model::LoadModel(const std::filesystem::path &path)
 {
 	std::string strPath = path.string();
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(strPath, aiProcess_Triangulate | aiProcess_GenSmoothNormals /* | aiProcess_FlipUVs*/ | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(strPath, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate );
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -106,17 +106,20 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.m_texCoords = vec;
 
-			// tangent
-			vector.x = mesh->mTangents[i].x;
-			vector.y = mesh->mTangents[i].y;
-			vector.z = mesh->mTangents[i].z;
-			vertex.m_tangent = vector;
+			if (mesh->HasTangentsAndBitangents())
+			{
+				// tangent
+				vector.x = mesh->mTangents[i].x;
+				vector.y = mesh->mTangents[i].y;
+				vector.z = mesh->mTangents[i].z;
+				vertex.m_tangent = vector;
 
-			// bitangent
-			vector.x = mesh->mBitangents[i].x;
-			vector.y = mesh->mBitangents[i].y;
-			vector.z = mesh->mBitangents[i].z;
-			vertex.m_biTangent = vector;
+				// bitangent
+				vector.x = mesh->mBitangents[i].x;
+				vector.y = mesh->mBitangents[i].y;
+				vector.z = mesh->mBitangents[i].z;
+				vertex.m_biTangent = vector;
+			}
 		}
 		else
 		{
@@ -135,8 +138,8 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 		}
 	}
-
-	if (mesh->mMaterialIndex > 0)
+	
+	if (scene->HasMaterials())
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 

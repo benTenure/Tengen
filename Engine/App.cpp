@@ -125,7 +125,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	g_mainCamera.ProcessScrollWheel(xoffset, yoffset);
 }
 
-// This needs to move into the intput manager
+// This needs to move into the input manager
 void processInput(GLFWwindow* window)
 {
 	int pressedKey = glfwGetKey(window, GLFW_KEY_ESCAPE);
@@ -276,6 +276,7 @@ int main()
 	std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
 	std::filesystem::path cameraPath = "Resources/Models/camera/Camera_01_4k.fbx";
 	std::filesystem::path sponzaPath = "Resources/Models/Sponza-master/sponza.obj";
+	std::filesystem::path carpetPath = "Resources/Models/carpet/carpet.fbx";
 
 	// Paths for the skybox
 	std::vector <std::filesystem::path> skyboxTexturePaths
@@ -289,6 +290,7 @@ int main()
 	};
 
 	//Model backpack(sponzaPath.c_str());
+	Model carpetModel(carpetPath.c_str());
 	Model backpack(backpackPath.c_str());
 
 	// Create Player
@@ -297,6 +299,13 @@ int main()
 	MeshComponent mesh(&backpack, &player); // THIS ONLY WORKS IN THIS SCOPE.
 	player.AddComponent(&material);
 	player.AddComponent(&mesh);
+
+	// Create Floor
+	GameObject carpet;
+	MaterialComponent carpetMaterial(defaultShader, &player);
+	MeshComponent carpetMesh(&carpetModel, &player);
+	carpet.AddComponent(&carpetMaterial);
+	carpet.AddComponent(&carpetMesh);
 
 	// Create skybox
 	GameObject skybox;
@@ -423,9 +432,9 @@ int main()
 		skyboxShader.Use();
 		skyboxShader.SetMat4("view", glm::mat4(glm::mat3(g_mainCamera.Update())));
 		skyboxShader.SetMat4("projection", projection);
-		skybox.Process(currentFrame);
+		//skybox.Process(currentFrame);
 
-
+		carpet.Process(g_deltaTime);
 		player.Process(g_deltaTime);
 
 		// Render texture to normal buffer

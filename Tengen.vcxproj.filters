@@ -102,6 +102,12 @@
     <ClCompile Include="Runtime\Components\CubeMapComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Runtime\Components\PlayerControllerComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Transform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\include\glm\detail\func_common.inl">
@@ -1665,6 +1671,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Runtime\Components\CubeMapComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Runtime\Components\PlayerControllerComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
