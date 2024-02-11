@@ -8,7 +8,7 @@ class Camera
 {
 public:
 	Camera();
-	Camera(glm::vec3 lookAt);
+	Camera(glm::vec3 targetPosition);
 
 	glm::mat4 Update(); // GetCurrentView() might be a better name? Cherno called his GetViewMatrix() which is as good as it gets
 

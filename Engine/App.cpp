@@ -271,12 +271,15 @@ int main()
 		 1.0f,  1.0f,  1.0f, 1.0f
 	};
 
-	std::filesystem::path backpackPath("Resources/Models/backpack/backpack.obj");
-	std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
-	std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
-	std::filesystem::path cameraPath = "Resources/Models/camera/Camera_01_4k.fbx";
-	std::filesystem::path sponzaPath = "Resources/Models/Sponza-master/sponza.obj";
+	//std::filesystem::path backpackPath("Resources/Models/backpack/backpack.obj");
+	//std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
+	//std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
+	//std::filesystem::path cameraPath = "Resources/Models/camera/Camera_01_4k.fbx";
+	//std::filesystem::path sponzaPath = "Resources/Models/Sponza-master/sponza.obj";
 	std::filesystem::path carpetPath = "Resources/Models/carpet/carpet.fbx";
+	std::filesystem::path donutPath = "Resources/Models/donut/donut.fbx";
+	std::filesystem::path asm2Path = "Resources/Models/Characters/the-amazing-spider-man-2/spider-man-2.fbx";
+	std::filesystem::path ironmanPath = "Resources/Models/Characters/iron-man-mark-85/ironman.fbx";
 
 	// Paths for the skybox
 	std::vector <std::filesystem::path> skyboxTexturePaths
@@ -289,14 +292,17 @@ int main()
 		std::filesystem::path("Resources/Images/Skybox/back.jpg"),
 	};
 
-	//Model backpack(sponzaPath.c_str());
+	//Model sponzaModel(sponzaPath.c_str());
+	//Model backpack(backpackPath.c_str());
+	//Model donutModel(donutPath.c_str());
 	Model carpetModel(carpetPath.c_str());
-	Model backpack(backpackPath.c_str());
+	//Model asm2Model(asm2Path.c_str());
+	Model ironmanModel(ironmanPath.c_str());
 
 	// Create Player
 	GameObject player;
 	MaterialComponent material(defaultShader, &player);
-	MeshComponent mesh(&backpack, &player); // THIS ONLY WORKS IN THIS SCOPE.
+	MeshComponent mesh(&ironmanModel, &player); // THIS ONLY WORKS IN THIS SCOPE.
 	player.AddComponent(&material);
 	player.AddComponent(&mesh);
 
@@ -306,6 +312,13 @@ int main()
 	MeshComponent carpetMesh(&carpetModel, &player);
 	carpet.AddComponent(&carpetMaterial);
 	carpet.AddComponent(&carpetMesh);
+
+	// Create donut
+	//GameObject donut;
+	//MaterialComponent donutMaterial(defaultShader, &player);
+	//MeshComponent donutMesh(&donutModel, &player);
+	//donut.AddComponent(&donutMaterial);
+	//donut.AddComponent(&donutMesh);
 
 	// Create skybox
 	GameObject skybox;
@@ -432,7 +445,7 @@ int main()
 		skyboxShader.Use();
 		skyboxShader.SetMat4("view", glm::mat4(glm::mat3(g_mainCamera.Update())));
 		skyboxShader.SetMat4("projection", projection);
-		//skybox.Process(currentFrame);
+		skybox.Process(currentFrame);
 
 		carpet.Process(g_deltaTime);
 		player.Process(g_deltaTime);
@@ -449,6 +462,7 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ImGUI.SwapBuffers equivalent
+		//editor.Render();
 		window.SwapBuffers();
 	}
 

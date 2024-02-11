@@ -42,7 +42,7 @@ void Model::LoadModel(const std::filesystem::path &path)
 {
 	std::string strPath = path.string();
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(strPath, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate );
+	const aiScene* scene = importer.ReadFile(strPath, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FlipUVs );
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -166,8 +166,11 @@ std::vector<Texture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString filename;
-		mat->GetTexture(type, i, &filename); 
+		mat->GetTexture(type, i, &filename);
 		std::filesystem::path pathToTexture(m_directory + '/' + filename.C_Str());
+		
+		float shininess = 0.0f;
+		mat->Get(AI_MATKEY_SHININESS, shininess);
 
 		bool skip = false;
 

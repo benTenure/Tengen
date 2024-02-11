@@ -18,15 +18,15 @@ void GameObject::Process(float deltaTime)
 
 void GameObject::AddComponent(Component* component)
 {
-	if (!component || !DoesComponentExist(component->CheckType()))
+	if (component || !DoesComponentExist(component->CheckType()))
 	{
 		m_components.push_back(component);
 	}
 }
 
-void GameObject::DeleteComponent(Component* component)
+void GameObject::DeleteComponent(ComponentType type)
 {
-	if (component || DoesComponentExist(component->CheckType()))
+	if (DoesComponentExist(type))
 	{
 		/*m_components.erase(
 			std::remove(
@@ -41,7 +41,7 @@ void GameObject::DeleteComponent(Component* component)
 
 		for (auto itr = m_components.begin(); itr != m_components.end(); itr++)
 		{
-			if ((*itr)->CheckType() == component->CheckType())
+			if ((*itr)->CheckType() == type)
 			{
 				m_components.erase(itr);
 			}
@@ -65,6 +65,16 @@ Component* GameObject::GetComponent(ComponentType type)
 	}
 
 	return nullptr;
+}
+
+Transform GameObject::GetTransform()
+{
+	return m_transform;
+}
+
+void GameObject::SetTransform(Transform transform)
+{
+	m_transform = transform;
 }
 
 // Return pointer to component if it does exist? better than re-searching over and over

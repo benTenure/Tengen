@@ -15,7 +15,7 @@ Camera::Camera()
 	m_sensitivity = 0.1f;
 }
 
-Camera::Camera(glm::vec3 lookAt)
+Camera::Camera(glm::vec3 targetPosition)
 {
 	// TODO: Supply a desired target for the camera to spawn looking at. Maybe something saved in the level or because we're doing transitions idk
 	// TODO: TODO: Is this really needed? Are cameras really going to by programmatically created and dynamically assigned at runtime? Sounds dumb
