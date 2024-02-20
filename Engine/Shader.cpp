@@ -38,7 +38,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	const char* fShaderCode = fragmentCode.c_str();
 
 	// 2. compile shaders
-	unsigned int vertex{}, fragment{};
+	unsigned int vertex = 0, fragment = 0;
 	int success;
 	char infoLog[512];
 
@@ -61,7 +61,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	glCompileShader(fragment);
 
 	// print compile errors if any
-	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+	glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
 		glGetShaderInfoLog(fragment, 512, NULL, infoLog);

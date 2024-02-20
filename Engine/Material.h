@@ -1,25 +1,28 @@
 #pragma once
 
-#include <Engine/Mesh.h>
+#include <string>
+#include <unordered_map>
 
-struct MaterialHandle
-{
-	unsigned int m_referencedMaterialID;
-};
+#include "Shader.h"
+#include "Texture.h"
 
 class Material
 {
 public:
 	Material() = delete;
-	Material(Texture diffuseMap, Texture roughnessMap, Texture normalMap, float shininess);
+	Material(std::string name, Texture* diffuseMap, Texture* roughnessMap, Texture* normalMap, float shininess);
+
+	std::string GetName();
+	Texture* GetDiffuseMap();
+	Texture* GetRoughnessMap();
+	Texture* GetNormalMap();
+	float GetShininess();
+	void SetupUniforms(Shader shader);
 
 private:
-	unsigned int m_ID;
-
-	Texture m_diffuseMap;
-	Texture m_roughnessMap;
-	Texture m_normalMap;
-	
-	float m_shininess;
+	std::string m_name;
+	Texture*	m_diffuseMap;
+	Texture*	m_roughnessMap;
+	Texture*	m_normalMap;
+	float		m_shininess;
 };
-

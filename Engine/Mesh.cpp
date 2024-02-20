@@ -1,10 +1,9 @@
 #include "Mesh.h"
 
 // Moving vectors like this good? Seem bad? Slow.
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture*> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
 	: m_vertices(vertices)
 	, m_indices(indices)
-	, m_textures(textures)
 	, m_VAO(0)
 	, m_VBO(0)
 	, m_EBO(0)
@@ -19,78 +18,71 @@ Mesh::~Mesh()
 	glDeleteBuffers(1, &m_EBO);
 }
 
-void Mesh::Draw(Shader& shader)
+void Mesh::Draw(Shader& shader, std::unordered_map<std::string, Material*>& materials)
 {
-	unsigned int diffuseNum = 1;
-	unsigned int specularNum = 1;
-	unsigned int normalNum = 1;
-	unsigned int heightNum = 1;
+	// MATERIAL SHOULD EXIST BY THIS POINT
+	materials[m_materialName]->SetupUniforms(shader);
 
-	shader.Use();
+	//unsigned int diffuseNum = 1;
+	//unsigned int specularNum = 1;
+	//unsigned int normalNum = 1;
+	//unsigned int heightNum = 1;
 
-	for (unsigned int i = 0; i < m_textures.size(); i++)
-	{
-		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-		
-		// retrieve texture number (the N in diffuse_textureN)
-		std::string number; 
-		std::string name = Texture::ToString(m_textures[i]->m_type);
+	//shader.Use();
 
-		switch (m_textures[i]->m_type)
-		{
-			case TextureType::DIFFUSE:
-			{
-				number = std::to_string(diffuseNum++);
-				break;
-			}
-			case TextureType::SPECULAR:
-			{
-				number = std::to_string(specularNum++);
-				break;
-			}
-			case TextureType::NORMAL:
-			{
-				number = std::to_string(normalNum++);
-				break;
-			}
-			case TextureType::HEIGHT:
-			{
-				number = std::to_string(heightNum++);
-				break;
-			}
-			default:
-			{
-				break;
-			}
-		}
+	//for (unsigned int i = 0; i < m_textures.size(); i++)
+	//{
+	//	glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+	//	
+	//	// retrieve texture number (the N in diffuse_textureN)
+	//	std::string number; 
+	//	std::string name = Texture::ToString(m_textures[i]->m_type);
 
-		// now set the sampler to the correct texture unit
-		glUniform1i(glGetUniformLocation(shader.GetID(), (name + number).c_str()), i);
+	//	switch (m_textures[i]->m_type)
+	//	{
+	//		case TextureType::DIFFUSE:
+	//		{
+	//			number = std::to_string(diffuseNum++);
+	//			break;
+	//		}
+	//		case TextureType::SPECULAR:
+	//		{
+	//			number = std::to_string(specularNum++);
+	//			break;
+	//		}
+	//		case TextureType::NORMAL:
+	//		{
+	//			number = std::to_string(normalNum++);
+	//			break;
+	//		}
+	//		case TextureType::HEIGHT:
+	//		{
+	//			number = std::to_string(heightNum++);
+	//			break;
+	//		}
+	//		default:
+	//		{
+	//			break;
+	//		}
+	//	}
 
-		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_2D, m_textures[i]->m_id);
-	}
+	//	// now set the sampler to the correct texture unit
+	//	glUniform1i(glGetUniformLocation(shader.GetID(), (name + number).c_str()), i);
 
-	glActiveTexture(GL_TEXTURE0);
+	//	// and finally bind the texture
+	//	glBindTexture(GL_TEXTURE_2D, m_textures[i]->m_id);
+	//}
+
+	//glActiveTexture(GL_TEXTURE0);
 	
 	glBindVertexArray(m_VAO);
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 
-void Mesh::AddVertex(Vertex vertex)
+void Mesh::SetMaterialName(std::string materialName)
 {
-	m_vertices.push_back(vertex);
-}
-
-void Mesh::AddIndex(unsigned int index)
-{
-	m_indices.push_back(index);
-}
-
-void Mesh::AddTexture(Texture* texture)
-{
-	m_textures.push_back(texture);
+	m_materialName = materialName;
 }
 
 void Mesh::SetupMesh()
@@ -118,22 +110,6 @@ void Mesh::SetupMesh()
     // vertex texture coordinates
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_texCoords));
-
-	//// vertex tangent
-	//glEnableVertexAttribArray(3);
-	//glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_tangent));
-	//
-	//// vertex bitangent
-	//glEnableVertexAttribArray(4);
-	//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_biTangent));
-
-	//// ids
-	//glEnableVertexAttribArray(5);
-	//glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, m_boneIDs));
-
-	//// weights
-	//glEnableVertexAttribArray(6);
-	//glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_weights));
 
     glBindVertexArray(0);
 }
@@ -188,35 +164,4 @@ void Texture::LoadTextureFromFile()
 	}
 
 	stbi_image_free(data);
-}
-
-std::string Texture::ToString(TextureType textureType)
-{
-	std::string result;
-
-	switch (textureType)
-	{
-	case TextureType::DIFFUSE:
-		result = "texture_diffuse";
-		break;
-	case TextureType::NORMAL:
-		result = "texture_normal";
-		break;
-	case TextureType::ROUGHNESS:
-		result = "texture_roughness";
-		break;
-	case TextureType::SPECULAR:
-		result = "texture_specular";
-		break;
-	case TextureType::AMBIENT_OCCLUSION:
-		result = "texture_ambient_occlusion";
-		break;
-	case TextureType::HEIGHT:
-		result = "texture_height";
-		break;
-	default:
-		break;
-	}
-
-	return result;
 }

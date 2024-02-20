@@ -199,7 +199,6 @@
     <ClCompile Include="Engine\Input\InputContext.cpp" />
     <ClCompile Include="Engine\Lights\Light.cpp" />
     <ClCompile Include="Engine\Material.cpp" />
-    <ClCompile Include="MaterialManager.cpp" />
     <ClCompile Include="Runtime\Components\CubeMapComponent.cpp" />
     <ClCompile Include="Runtime\Components\PlayerControllerComponent.cpp" />
     <ClCompile Include="Runtime\GameObjectManager.cpp" />
@@ -227,6 +226,7 @@
     <ClCompile Include="Engine\Model.cpp" />
     <ClCompile Include="Singleton.cpp" />
     <ClCompile Include="Engine\Transform.cpp" />
+    <ClCompile Include="Engine\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\include\assimp\color4.inl" />
@@ -396,7 +396,6 @@
     <ClInclude Include="Engine\Lights\Light.h" />
     <ClInclude Include="Engine\Renderer\OpenGLDebug.h" />
     <ClInclude Include="Engine\Material.h" />
-    <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="Runtime\Components\CubeMapComponent.h" />
     <ClInclude Include="Runtime\Components\PlayerControllerComponent.h" />
     <ClInclude Include="Runtime\GameObjectManager.h" />
@@ -767,6 +766,7 @@
     <ClInclude Include="Engine\Model.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="Engine\Transform.h" />
+    <ClInclude Include="Engine\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\awesomeface.png" />

@@ -227,10 +227,10 @@ int main()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	Shader defaultShader("Shaders/default.vert", "Shaders/default.frag");
-	Shader lightShader("Shaders/light.vert", "Shaders/light.frag");
-	Shader quadShader("Shaders/renderQuad.vert", "Shaders/renderQuad.frag");
-	Shader skyboxShader("Shaders/skybox.vert", "Shaders/skybox.frag");
+	//Shader lightShader("Shaders/light.vert", "Shaders/light.frag");
+	Shader defaultShader("C:/PersonalProjects/OpenGL/Tengen/Shaders/default.vert", "C:/PersonalProjects/OpenGL/Tengen/Shaders/default.frag");
+	Shader quadShader("C:/PersonalProjects/OpenGL/Tengen/Shaders/renderQuad.vert", "C:/PersonalProjects/OpenGL/Tengen/Shaders/renderQuad.frag");
+	Shader skyboxShader("C:/PersonalProjects/OpenGL/Tengen/Shaders/skybox.vert", "C:/PersonalProjects/OpenGL/Tengen/Shaders/skybox.frag");
 
 	// Light (Need to create some kind of Light class. It should have its own Material, A simple cube mesh for now?)
 	unsigned int lightVAO, lightVBO;
@@ -244,11 +244,6 @@ int main()
 	glEnableVertexAttribArray(0);
 
 	glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
-
-	defaultShader.Use();
-	defaultShader.SetInt("material.diffuse", 0);
-	defaultShader.SetInt("material.specular", 1);
-	defaultShader.SetInt("material.emission", 2);
 
 	quadShader.Use();
 	quadShader.SetInt("screenTexture", 0);
@@ -271,15 +266,10 @@ int main()
 		 1.0f,  1.0f,  1.0f, 1.0f
 	};
 
-	//std::filesystem::path backpackPath("Resources/Models/backpack/backpack.obj");
-	//std::filesystem::path stormTrooperPath = "Resources/Models/stormtrooper/StormTrooper.fbx";
-	//std::filesystem::path cubePath = "Resources/Models/defaults/cube/cube.fbx";
-	//std::filesystem::path cameraPath = "Resources/Models/camera/Camera_01_4k.fbx";
-	//std::filesystem::path sponzaPath = "Resources/Models/Sponza-master/sponza.obj";
-	std::filesystem::path carpetPath = "Resources/Models/carpet/carpet.fbx";
-	std::filesystem::path donutPath = "Resources/Models/donut/donut.fbx";
-	std::filesystem::path asm2Path = "Resources/Models/Characters/the-amazing-spider-man-2/spider-man-2.fbx";
-	std::filesystem::path ironmanPath = "Resources/Models/Characters/iron-man-mark-85/ironman.fbx";
+	//std::filesystem::path carpetPath = "Resources/Models/carpet/carpet.fbx";
+	std::filesystem::path carpetPath = "C:/PersonalProjects/OpenGL/Tengen/Resources/Models/carpet/carpet.fbx";
+	//std::filesystem::path ironmanPath = "Resources/Models/Characters/iron-man-mark-85/ironman.fbx";
+	std::filesystem::path ironmanPath = "C:/PersonalProjects/OpenGL/Tengen/Resources/Models/Characters/iron-man-mark-85/ironman.fbx";
 
 	// Paths for the skybox
 	std::vector <std::filesystem::path> skyboxTexturePaths
@@ -299,16 +289,17 @@ int main()
 	//Model asm2Model(asm2Path.c_str());
 	Model ironmanModel(ironmanPath.c_str());
 
+	// TODO: Need to move this into a neat function for loading imports and spitting out a model. Factory?
 	// Create Player
 	GameObject player;
-	MaterialComponent material(defaultShader, &player);
+	MaterialComponent material(defaultShader, ironmanModel.GetMaterialMap(), &player);
 	MeshComponent mesh(&ironmanModel, &player); // THIS ONLY WORKS IN THIS SCOPE.
 	player.AddComponent(&material);
 	player.AddComponent(&mesh);
 
 	// Create Floor
 	GameObject carpet;
-	MaterialComponent carpetMaterial(defaultShader, &player);
+	MaterialComponent carpetMaterial(defaultShader, carpetModel.GetMaterialMap(), &player);
 	MeshComponent carpetMesh(&carpetModel, &player);
 	carpet.AddComponent(&carpetMaterial);
 	carpet.AddComponent(&carpetMesh);
@@ -320,6 +311,7 @@ int main()
 	//donut.AddComponent(&donutMaterial);
 	//donut.AddComponent(&donutMesh);
 
+	// TODO: Create a Skybox class that inherits from GameObject. This needs to be a thing that's made correctly
 	// Create skybox
 	GameObject skybox;
 	CubeMapComponent cubeMap(skyboxTexturePaths, skyboxShader, &skybox);
@@ -447,7 +439,7 @@ int main()
 		skyboxShader.SetMat4("projection", projection);
 		skybox.Process(currentFrame);
 
-		carpet.Process(g_deltaTime);
+		//carpet.Process(g_deltaTime);
 		player.Process(g_deltaTime);
 
 		// Render texture to normal buffer

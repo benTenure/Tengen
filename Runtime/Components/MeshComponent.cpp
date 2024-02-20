@@ -18,7 +18,8 @@ void MeshComponent::Process(float deltaTime)
 		if (mat)
 		{
 			Shader shader = mat->GetShader();
-			m_model->Draw(shader);
+			std::unordered_map<std::string, Material*> mats = mat->GetMaterials();
+			m_model->Draw(shader, mats);
 		}
 	}
 	

@@ -5,7 +5,7 @@
 
 Model::Model()
 	: m_meshes()
-	, m_loadedTextures()
+	, m_materials()
 	, m_directory("")
 	, m_applyGammaCorrection(false)
 {}
@@ -24,18 +24,24 @@ Model::~Model()
 		delete mesh;
 	}
 
-	for (auto texture : m_loadedTextures)
+	for (auto itr = m_materials.begin(); itr != m_materials.end(); ++itr)
 	{
-		delete texture;
+		delete itr->second;
 	}
+	m_materials.clear();
 }
 
-void Model::Draw(Shader& shader)
+void Model::Draw(Shader& shader, std::unordered_map<std::string, Material*>& materials)
 {
 	for (auto mesh : m_meshes)
 	{
-		mesh->Draw(shader);
+		mesh->Draw(shader, materials);
 	}
+}
+
+std::unordered_map<std::string, Material*> Model::GetMaterialMap()
+{
+	return m_materials;
 }
 
 void Model::LoadModel(const std::filesystem::path &path)
@@ -60,8 +66,18 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	// process all the node's meshes (if any)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		m_meshes.push_back(ProcessMesh(mesh, scene));
+		aiMesh* loadedMesh = scene->mMeshes[node->mMeshes[i]];
+		Mesh* mesh = ProcessMesh(loadedMesh);
+
+		if (scene->HasMaterials())
+		{
+			aiMaterial* material = scene->mMaterials[loadedMesh->mMaterialIndex];
+			ProcessMaterial(material);
+
+			mesh->SetMaterialName(material->GetName().C_Str());
+		}
+	
+		m_meshes.push_back(mesh);
 	}
 
 	// then do the same for each of its children
@@ -71,11 +87,10 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+Mesh* Model::ProcessMesh(aiMesh* mesh)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture*> textures;
 
 	// Vertex Processing
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -100,26 +115,9 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			glm::vec2 vec(0.0f);
 
-			// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
-			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.m_texCoords = vec;
-
-			if (mesh->HasTangentsAndBitangents())
-			{
-				// tangent
-				vector.x = mesh->mTangents[i].x;
-				vector.y = mesh->mTangents[i].y;
-				vector.z = mesh->mTangents[i].z;
-				vertex.m_tangent = vector;
-
-				// bitangent
-				vector.x = mesh->mBitangents[i].x;
-				vector.y = mesh->mBitangents[i].y;
-				vector.z = mesh->mBitangents[i].z;
-				vertex.m_biTangent = vector;
-			}
 		}
 		else
 		{
@@ -138,59 +136,56 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 		}
 	}
-	
-	if (scene->HasMaterials())
-	{
-		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<Texture*> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::DIFFUSE);
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-
-		std::vector<Texture*> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::SPECULAR);
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		
-		std::vector<Texture*> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, TextureType::NORMAL); //aiTextureType_NORMALS seems to be the actual option??
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-		std::vector<Texture*> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, TextureType::HEIGHT);
-		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-	}
-
-	return new Mesh(vertices, indices, textures);
+	return new Mesh(vertices, indices);
 }
 
-std::vector<Texture*> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, TextureType textureType)
+void Model::ProcessMaterial(aiMaterial* aiMat)
 {
-	std::vector<Texture*> textures;
+	std::string name(aiMat->GetName().C_Str());
 
-	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+	if (m_materials.find(name) != m_materials.end())
 	{
-		aiString filename;
-		mat->GetTexture(type, i, &filename);
-		std::filesystem::path pathToTexture(m_directory + '/' + filename.C_Str());
-		
-		float shininess = 0.0f;
-		mat->Get(AI_MATKEY_SHININESS, shininess);
-
-		bool skip = false;
-
-		for (unsigned int j = 0; j < m_loadedTextures.size(); j++)
-		{
-			if (m_loadedTextures[j]->m_path.string().compare(pathToTexture.string()) == 0)
-			{
-				textures.push_back(m_loadedTextures[j]);
-				skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
-				break;
-			}
-		}
-
-		if (!skip)
-		{
-			Texture* texture = new Texture(textureType, pathToTexture);
-			textures.push_back(texture);
-			m_loadedTextures.push_back(texture);
-		}
+		return;
 	}
 
-	return textures;
+	// Diffuse Map
+	Texture* diffuseMap = CreateTexture(aiMat, aiTextureType_DIFFUSE, TextureType::DIFFUSE);
+
+	// Roughness Map
+	Texture* roughnessMap = CreateTexture(aiMat, aiTextureType_DIFFUSE_ROUGHNESS, TextureType::ROUGHNESS);
+
+	// Normal Map
+	Texture* normalMap = CreateTexture(aiMat, aiTextureType_NORMALS, TextureType::NORMAL);
+
+	// Shininess Value
+	float shininess = 0.0f;
+	aiMat->Get(AI_MATKEY_SHININESS, shininess);
+
+	Material* myMat = new Material(name, diffuseMap, roughnessMap, normalMap, shininess);
+	m_materials[name] = myMat;
+}
+
+Texture* Model::CreateTexture(aiMaterial* aiMat, aiTextureType aiType, TextureType textureType)
+{
+	//aiString filename;
+	//aiMat->GetTexture(aiType, aiMat->GetTextureCount(aiType), &filename);
+
+	// Multiple maps of the same kind are not a thing in Tengen. This should always be true
+	// and only ever pull the first texture of the wanted type
+	if (aiMat->GetTextureCount(aiType) > 0)
+	{
+		aiString filename;
+		aiGetMaterialTexture(aiMat, aiType, 0, &filename);
+		std::filesystem::path pathToTexture(m_directory + '/' + filename.C_Str());
+		return new Texture(textureType, pathToTexture);		
+	}
+	/*
+	else
+	{
+		UseRelevantBackupColorInstead();
+	}
+	*/
+
+	return nullptr;
 }

@@ -8,6 +8,13 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+enum TextureLocation
+{
+	DIFFUSE_LOCATION = 0,
+	SPECULAR_LOCATION,
+	EMISSION_LOCATION,
+};
+
 class Shader
 {
 public:
